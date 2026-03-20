@@ -1,0 +1,33 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  createPetApi,
+  deletePetApi,
+  getPetsApi,
+  updatePetApi,
+} from "../../../services/authPet";
+import { PetCreate, PetUpdate } from "../../models/pet";
+
+export const usePetsQuery = () => {
+  return useQuery({
+    queryKey: ["pets"],
+    queryFn: getPetsApi,
+  });
+};
+
+export const useCreatePetMutation = () => {
+  return useMutation({
+    mutationFn: (payload: PetCreate) => createPetApi(payload),
+  });
+};
+
+export const useUpdatePetMutation = () => {
+  return useMutation({
+    mutationFn: (payload: PetUpdate) => updatePetApi(payload),
+  });
+};
+
+export const useDeletePetMutation = () => {
+  return useMutation({
+    mutationFn: (id: number) => deletePetApi(id),
+  });
+};

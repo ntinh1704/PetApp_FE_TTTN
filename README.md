@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+## Pet App – Expo React Native
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Pet App** is a mobile application built with Expo, React Native, and `expo-router` that helps users manage their pets and discover pet-related services.
 
-## Get started
+The UI content is primarily in Vietnamese.
 
-1. Install dependencies
+---
+
+## Tech stack
+
+- **Framework**: Expo (React Native)
+- **Navigation**: `expo-router`, `@react-navigation/*`
+- **Language**: TypeScript
+- **State management**: React Context (`PetsContext`) for pet management
+- **UI**: `react-native`, `react-native-safe-area-context`, `@expo/vector-icons`
+- **Media**: `expo-image-picker` for selecting pet photos
+
+---
+
+## Features
+
+- **Authentication flow**
+  - Splash screen and login screen
+  - Basic login that navigates to the home tab
+  - Screens for registration and password recovery
+
+- **Pet management**
+  - Global `PetsContext` to store and update the pet list
+  - Add a new pet with: name, breed, gender, age, color, height, weight, and image
+  - View pet details and delete pets
+
+- **Home & services**
+  - Personalized greeting on the **Home** screen
+  - Quick access to notifications
+  - “Thú cưng của tôi” (My Pets) section showing pets
+  - Pet-related services list (vet, grooming, hotel, walking, etc.) defined in `services.ts`
+
+- **Navigation**
+  - Auth stack: `(auth)` group with login, register, forget password, splash
+  - User stack: `(user)` group with bottom tabs (Home, Pets, History, Profile, Services)
+  - Nested stack screens for notifications and pet detail
+
+---
+
+## Project structure (main parts)
+
+- `app/_layout.tsx` – root stack with `(auth)` and `(user)` groups
+- `app/index.tsx` – entry pointing to the splash screen
+- `app/screens/auth/*` – authentication-related screens
+- `app/screens/user/tabs/*` – main tab screens (Home, Pets, History, Profile, Service)
+- `app/screens/user/stack/*` – nested stack screens (notifications, pet detail)
+- `app/utils/contexts/PetsContext.tsx` – pet context provider and hook
+- `app/utils/data/services.ts` – static list of pet services
+- `app/utils/models/pet.ts` – `Pet` model definition
+
+---
+
+## Getting started
+
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Start the app**
 
    ```bash
+   npm start
+   # or
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Run on device / emulator**
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - Scan the QR code with the Expo Go app, **or**
+   - Use:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+     ```bash
+     npm run android
+     npm run ios
+     npm run web
+     ```
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Development notes
 
-```bash
-npm run reset-project
-```
+- The app uses **file-based routing** via `expo-router`.
+- Wrap your app with `PetsProvider` (from `PetsContext`) if you create new entry points.
+- Most UI text is in Vietnamese; keep this consistent when adding new screens.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Scripts
 
-To learn more about developing your project with Expo, look at the following resources:
+- `npm start` – start the Expo dev server
+- `npm run android` – run on Android emulator / device
+- `npm run ios` – run on iOS simulator (macOS only)
+- `npm run web` – run in the browser
+- `npm run lint` – run ESLint checks
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

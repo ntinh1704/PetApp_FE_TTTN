@@ -41,3 +41,18 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Sensitive information
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# logs
+*.log
+.eslintcache

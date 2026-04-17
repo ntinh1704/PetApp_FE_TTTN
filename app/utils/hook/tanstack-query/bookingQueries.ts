@@ -1,10 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-    createBookingApi,
-    deleteBookingApi,
-    getBookingByIdApi,
-    getBookingsApi,
-    updateBookingApi,
+  createBookingApi,
+  deleteBookingApi,
+  getBookingByIdApi,
+  getBookingsApi,
+  updateBookingApi,
 } from "../../../services/authBooking";
 import { BookingCreate, BookingUpdate } from "../../models/booking";
 
@@ -24,14 +24,28 @@ export const useBookingByIdQuery = (bookingId: number) => {
 };
 
 export const useCreateBookingMutation = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (payload: BookingCreate) => createBookingApi(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+    },
   });
 };
 
 export const useUpdateBookingMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: BookingUpdate) => updateBookingApi(payload),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      if (variables.id) {
+        queryClient.invalidateQueries({ queryKey: ["bookings", variables.id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unreadCount"] });
+    },
   });
 };
 

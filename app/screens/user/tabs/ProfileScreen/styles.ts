@@ -28,56 +28,60 @@ export const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  cover: {
-    width: "100%",
-    height: 220,
-  },
-
   infoCard: {
     backgroundColor: "#FFF",
     marginHorizontal: 16,
-    marginTop: -40,
+    marginTop: 16,
     borderRadius: 20,
     padding: 16,
   },
 
   infoHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 12,
   },
 
-  name: {
-    fontSize: 18,
-    fontWeight: "800",
-    flex: 1,
-    marginRight: 8,
+  avatarWrap: {
+    width: 68,
+    height: 68,
+    position: "relative",
+  },
+
+  avatar: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: "#E5E7EB",
+  },
+
+  avatarEditIcon: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#6B7280",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#FFF",
   },
 
   signOut: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    alignSelf: "flex-end",
+    marginBottom: 10,
   },
 
   signOutText: {
     color: "#EF4444",
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: "600",
-  },
-
-  missingBox: {
-    backgroundColor: "#FEF3C7",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
-  },
-
-  missingText: {
-    fontSize: 12,
-    color: "#92400E",
   },
 
   profileRow: {
@@ -123,21 +127,37 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  formCard: {
-    backgroundColor: "#FFF",
-    marginHorizontal: 16,
-    marginTop: 14,
-    borderRadius: 20,
-    padding: 16,
+  /* ===== Modal ===== */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
   },
 
-  formTitle: {
+  modalContent: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    width: "100%",
+    maxWidth: 400,
+  },
+
+  modalTitle: {
     fontSize: 16,
     fontWeight: "800",
-    marginBottom: 12,
+    marginBottom: 14,
     color: "#111827",
   },
 
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+
+  /* ===== Form elements ===== */
   input: {
     borderWidth: 1,
     borderColor: "#E5E7EB",
@@ -147,12 +167,6 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#111827",
     backgroundColor: "#FFF",
-  },
-
-  formActions: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 10,
   },
 
   formBtn: {

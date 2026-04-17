@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createPetApi,
   deletePetApi,
@@ -21,8 +21,13 @@ export const useCreatePetMutation = () => {
 };
 
 export const useUpdatePetMutation = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (payload: PetUpdate) => updatePetApi(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pets"] });
+    },
   });
 };
 

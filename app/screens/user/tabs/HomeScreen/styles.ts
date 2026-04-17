@@ -50,6 +50,32 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  notiBadge: {
+    position: "absolute",
+    top: -2,
+    right: -4,
+    backgroundColor: "#EF4444",
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  notiBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
   },
 
   container: {
@@ -74,11 +100,14 @@ export const styles = StyleSheet.create({
 
   petList: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    rowGap: 12,
   },
 
   petItem: {
     alignItems: "center",
+    width: "33.33%",
   },
 
   petAvatar: {
@@ -91,6 +120,26 @@ export const styles = StyleSheet.create({
   petName: {
     fontSize: 12,
     fontWeight: "600",
+    textAlign: "center",
+  },
+
+  emptyPetsWrap: {
+    alignItems: "center",
+    paddingVertical: 16,
+    gap: 6,
+  },
+
+  emptyPetsText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+
+  addPetNowText: {
+    fontSize: 14,
+    color: GREEN,
+    fontWeight: "800",
+    textDecorationLine: "underline",
   },
 
   sectionHeader: {
@@ -113,7 +162,6 @@ export const styles = StyleSheet.create({
 
   serviceList: {
     flexDirection: "row",
-    // justifyContent: "space-between",
     flexWrap: "wrap",
   },
 

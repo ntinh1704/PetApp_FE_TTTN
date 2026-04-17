@@ -2,7 +2,16 @@ import { Booking, BookingCreate, BookingUpdate } from "../utils/models/booking";
 import { api } from "./api";
 
 export async function getBookingsApi() {
-  const res = await api.get<Booking[]>("/bookings");
+  const res = await api.get<Booking[]>("/bookings", {
+    params: { all: true },
+  });
+  return res.data;
+}
+
+export async function getBookingsByDateApi(date: string) {
+  const res = await api.get<Booking[]>("/bookings", {
+    params: { all: true, booking_date: date },
+  });
   return res.data;
 }
 

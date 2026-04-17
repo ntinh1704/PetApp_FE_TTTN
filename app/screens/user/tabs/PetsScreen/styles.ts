@@ -23,6 +23,16 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
+    notiBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+
   /* CONTENT */
   content: {
     padding: 16,
@@ -66,10 +76,31 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
   },
 
-  view: {
-    marginRight: 10,
+  viewBtn: {
+    backgroundColor: "#E8F5E9",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+  },
+
+  viewText: {
     fontWeight: "800",
     color: "#2E7D32",
+    fontSize: 13,
+  },
+
+  deleteBtn: {
+    backgroundColor: "#FFEBEE",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+
+  deleteText: {
+    fontWeight: "800",
+    color: "#DC2626",
+    fontSize: 13,
   },
 
   input: {
@@ -78,6 +109,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 42,
     marginBottom: 10,
+    fontSize: 14,
     fontWeight: "600",
   },
 
@@ -93,6 +125,7 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 42,
+    fontSize: 14,
     fontWeight: "600",
   },
 
@@ -111,7 +144,7 @@ export const styles = StyleSheet.create({
   },
 
   imagePicker: {
-    height: 120,
+    height: 300,
     borderRadius: 14,
     backgroundColor: "#E0E0E0",
     alignItems: "center",

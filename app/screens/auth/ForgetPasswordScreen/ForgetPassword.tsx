@@ -1,20 +1,38 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useForgotPassword } from "../../../utils/hook/useLogin";
 import styles from "./styles";
 
 export default function ForgetPasswordScreen() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   const onSendResetLink = () => {
-    if (!email) return;
+    if (!email.trim()) {
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập địa chỉ email.");
+      return;
+    }
 
-    // TODO: gọi API / Firebase gửi email reset password
-    console.log("Gửi link đặt lại mật khẩu tới:", email);
-
-    setSent(true);
+    forgotPassword(
+      { email },
+      {
+        onSuccess: () => {
+          Alert.alert("Thành công", "Mã OTP đã được gửi về email của bạn.");
+          router.push({
+            pathname: "/screens/auth/OTPVerificationScreen/OTPVerification",
+            params: { email }
+          });
+        },
+        onError: (error: any) => {
+          Alert.alert(
+            "Lỗi",
+            error?.response?.data?.detail || "Không thể gửi email. Vui lòng kiểm tra lại."
+          );
+        },
+      }
+    );
   };
 
   const goBackLogin = () => {
@@ -23,54 +41,56 @@ export default function ForgetPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.center}>
-        <View style={styles.card}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.center}>
+            <Image
+              source={require("../../../assets/images/logo_coco.png")}
+              style={styles.logo}
+            />
+            <View style={styles.card}>
+              <Text style={styles.title}>Quên mật khẩu?</Text>
+              <Text style={styles.desc}>
+                Nhập email của bạn, chúng tôi sẽ gửi mã xác nhận tạo mật khẩu mới.
+              </Text>
 
-          {/* Logo */}
-          <Image
-            source={require("../../../assets/images/logo_coco.png")}
-            style={styles.logo}
-          />
+              <>
+                <TextInput
+                  placeholder="Địa chỉ email"
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.input}
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
 
-          <Text style={styles.title}>Quên mật khẩu?</Text>
-          <Text style={styles.desc}>
-            Nhập email của bạn, chúng tôi sẽ gửi link tạo mật khẩu mới.
-          </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.sendBtn,
+                    (!email || isPending) && { opacity: 0.5 },
+                  ]}
+                  onPress={onSendResetLink}
+                  disabled={!email || isPending}
+                >
+                  <Text style={styles.sendText}>{isPending ? "ĐANG GỬI..." : "GỬI MÃ KHÔI PHỤC"}</Text>
+                </TouchableOpacity>
+              </>
 
-          {!sent ? (
-            <>
-              <TextInput
-                placeholder="Địa chỉ email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                placeholderTextColor="#9CA3AF"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-
-              <TouchableOpacity
-                style={[
-                  styles.sendBtn,
-                  !email && { opacity: 0.5 },
-                ]}
-                onPress={onSendResetLink}
-                disabled={!email}
-              >
-                <Text style={styles.sendText}>GỬI LINK KHÔI PHỤC</Text>
+              <TouchableOpacity onPress={goBackLogin} style={styles.backWrap}>
+                <Text style={styles.backText}>← Quay lại đăng nhập</Text>
               </TouchableOpacity>
-            </>
-          ) : (
-            <Text style={styles.successText}>
-              Link tạo mật khẩu mới đã được gửi về email của bạn.
-            </Text>
-          )}
-
-          <TouchableOpacity onPress={goBackLogin} style={styles.backWrap}>
-            <Text style={styles.backText}>← Quay lại đăng nhập</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

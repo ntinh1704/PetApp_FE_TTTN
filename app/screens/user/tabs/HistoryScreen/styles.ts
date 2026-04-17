@@ -23,33 +23,44 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
   },
 
-  filterBar: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    // gap: 5,
+    notiBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
   },
 
-  filterItem: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
+  filterRow: {
+    marginTop: 12,
+    marginBottom: 12,
   },
 
-  filterItemActive: {
-    backgroundColor: GREEN,
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    marginRight: 8,
+    backgroundColor: "#FFFFFF",
   },
 
-  filterText: {
-    fontSize: 13,
-    fontWeight: "600",
+  filterChipActive: {
+    borderColor: GREEN,
+    backgroundColor: "#ECFDF5",
+  },
+
+  filterChipText: {
+    fontSize: 12,
     color: "#374151",
+    fontWeight: "600",
   },
 
-  filterTextActive: {
-    color: "#FFF",
+  filterChipTextActive: {
+    color: "#047857",
   },
 
   emptyText: {
@@ -69,7 +80,7 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     marginBottom: 14,
     flexDirection: "row",
     justifyContent: "space-between",

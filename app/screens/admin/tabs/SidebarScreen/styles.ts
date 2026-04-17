@@ -29,6 +29,7 @@ export default StyleSheet.create({
     color: "#111827",
   },
   profileEmail: {
+    paddingLeft: 25,
     fontSize: 13,
     color: "#6B7280",
   },
@@ -41,13 +42,8 @@ export default StyleSheet.create({
     paddingVertical: 4,
   },
   menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
     marginHorizontal: 6,
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
   },
   menuItemActive: {
     backgroundColor: "rgba(92,177,90,0.12)",

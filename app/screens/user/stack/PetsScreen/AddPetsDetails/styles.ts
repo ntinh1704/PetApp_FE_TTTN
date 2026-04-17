@@ -28,12 +28,33 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
 
-  image: {
+  avatarWrap: {
     width: 120,
     height: 120,
-    borderRadius: 14,
     alignSelf: "center",
+    position: "relative",
     marginBottom: 16,
+  },
+
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#E5E7EB",
+  },
+
+  avatarEditIcon: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#6B7280",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#FFF",
   },
 
   input: {

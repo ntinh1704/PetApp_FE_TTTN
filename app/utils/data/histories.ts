@@ -2,7 +2,10 @@ export type HistoryStatus =
   | "Hoàn thành"
   | "Đang xác nhận"
   | "Đã xác nhận"
-  | "Đã hủy";
+  | "Đang xin hủy"
+  | "Đã hủy"
+  | "Chờ thanh toán"
+  | "Đã thanh toán";
 
 export type HistoryItem = {
   id: string;

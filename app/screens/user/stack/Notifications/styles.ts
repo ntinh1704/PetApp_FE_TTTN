@@ -5,6 +5,7 @@ const GREEN = "#5CB15A";
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    backgroundColor: "#F3F4F6", 
   },
 
   /* HEADER */
@@ -27,61 +28,110 @@ export const styles = StyleSheet.create({
   content: {
     backgroundColor: "#F3F4F6",
     minHeight: "100%",
-    padding: 16,
     paddingBottom: 24,
   },
 
   section: {
-    marginBottom: 20,
+    marginBottom: 0,
   },
 
   sectionTitle: {
     fontSize: 14,
     fontWeight: "800",
-    marginBottom: 10,
-    color: "#111827",
+    color: "#4B5563",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
 
   card: {
     backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 14,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E5E7EB",
   },
 
   row: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
+    alignItems: "flex-start",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  
+  rowUnread: {
+    backgroundColor: "#E6F4EA", 
   },
 
-  iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#F3F4F6",
+  thumbnailContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#E5E7EB",
+    marginRight: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+
+  },
+  
+  thumbnailImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
 
-  rowText: {
+  textContainer: {
     flex: 1,
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "600",
+    marginRight: 8,
   },
 
-  unreadText: {
-    fontWeight: "800",
+  titleText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 4,
+  },
+
+  bodyText: {
+    fontSize: 14,
+    color: "#4B5563",
+    lineHeight: 20,
+    marginBottom: 6,
+  },
+
+  highlightText: {
+    fontWeight: "bold",
+    color: GREEN,
+  },
+
+  timeText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+
+  chevronContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 4,
   },
 
   unreadDot: {
     position: "absolute",
     top: -2,
     right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: "#EF4444",
+    borderWidth: 2,
+    borderColor: "#FFF",
+  },
+
+  stateText: {
+    textAlign: "center",
+    color: "#6B7280",
+    fontSize: 14,
+    marginTop: 24,
   },
 });

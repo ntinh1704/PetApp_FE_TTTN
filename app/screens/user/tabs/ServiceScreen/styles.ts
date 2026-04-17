@@ -19,9 +19,20 @@ export const styles = StyleSheet.create({
   },
 
   headerSide: {
-    width: 22,
+    width: 36,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "visible",
+  },  
+
+  notiBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
   },
 
   headerTitle: {
@@ -52,13 +63,17 @@ export const styles = StyleSheet.create({
 
   /* ===== SERVICE LIST ===== */
   list: {
-    gap: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 16,
   },
 
   card: {
+    width: "100%",
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
@@ -68,12 +83,13 @@ export const styles = StyleSheet.create({
 
   cardHeader: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    alignItems: "flex-start",
+    gap: 8,
     marginBottom: 8,
   },
 
   cardTitle: {
+    flex: 1,
     fontSize: 16,
     fontWeight: "700",
     color: "#111827",
@@ -90,6 +106,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 6,
+    gap: 4,
   },
 
   cardLabel: {
@@ -101,6 +118,8 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: "#111827",
+    flex: 1,
+    textAlign: "right",
   },
 
   cardActions: {

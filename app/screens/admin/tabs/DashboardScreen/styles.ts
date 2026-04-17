@@ -1,5 +1,25 @@
 import { StyleSheet } from "react-native";
 
+export const chartConfig = {
+  backgroundColor: "#ffffff",
+  backgroundGradientFrom: "#ffffff",
+  backgroundGradientTo: "#ffffff",
+  decimalPlaces: 0,
+  color: (opacity = 1) => `rgba(92, 177, 90, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
+  style: {
+    borderRadius: 16,
+  },
+  propsForDots: {
+    r: "4",
+    strokeWidth: "2",
+    stroke: "#5CB15A",
+  },
+  propsForBackgroundLines: {
+    stroke: "#F3F4F6",
+  },
+};
+
 export default StyleSheet.create({
   safe: {
     flex: 1,
@@ -14,10 +34,15 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 14,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: "#5CB15A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   headerLeft: {
     flexDirection: "row",
@@ -36,16 +61,39 @@ export default StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+  notiBadge: {
+    position: "absolute",
+    top: -2,
+    right: -4,
+    backgroundColor: "#EF4444",
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notiBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
   },
   statGrid: {
     gap: 12,
   },
   statCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statLabel: {
     flexDirection: "row",
@@ -55,12 +103,14 @@ export default StyleSheet.create({
   },
   statText: {
     fontSize: 14,
+    fontWeight: "600",
     color: "#111827",
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#111827",
+    color: "#1F2937",
+    marginTop: 4,
   },
   section: {
     marginTop: 20,
@@ -94,14 +144,77 @@ export default StyleSheet.create({
   },
   recentItem: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    marginBottom: 8,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 0,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
+    elevation: 1,
   },
   recentText: {
     fontSize: 14,
     color: "#111827",
+  },
+  chartHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  chartTitle: {
+    marginBottom: 0,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 5,
+    padding: 12,
+  },
+  filterButtonBase: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  filterButtonActive: {
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  filterButtonInactive: {
+    backgroundColor: "transparent",
+    shadowColor: "transparent",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0,
+    shadowRadius: 2,
+    elevation: 0,
+  },
+  filterTextBase: {
+    fontSize: 12,
+  },
+  filterTextActive: {
+    fontWeight: "600",
+    color: "#111827",
+  },
+  filterTextInactive: {
+    fontWeight: "400",
+    color: "#6B7280",
+  },
+  chartStyle: {
+    marginVertical: 8,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
 });

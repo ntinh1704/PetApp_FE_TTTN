@@ -10,7 +10,12 @@ export default function StackLayout() {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="BookingScreen/Booking" />
+        <Stack.Screen name="CartScreen/Cart" />
+        <Stack.Screen name="ServiceDetail/ServiceDetail" />
+        <Stack.Screen name="BookingBuilder/BookingBuilder" />
+        <Stack.Screen name="ChatScreen/ChatScreen" />
+        <Stack.Screen name="PaymentQR/PaymentQR" />
+        <Stack.Screen name="UserBookingDetail/BookingDetail" />
       </Stack>
     </>
   );

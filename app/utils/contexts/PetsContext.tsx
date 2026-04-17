@@ -35,7 +35,7 @@ export const PetsProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  const removePet = (id: string) => {
+  const removePet = (id: int) => {
     setPets((prev) => prev.filter((p) => p.id !== id));
   };
 

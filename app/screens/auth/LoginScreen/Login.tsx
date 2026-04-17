@@ -1,9 +1,13 @@
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,12 +20,30 @@ import styles from "./styles";
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isEmailInvalid = useMemo(() => {
+    if (!email) return false;
+    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }, [email]);
 
   const { mutate, isPending } = useLogin();
 
   const handleLogin = () => {
+    if (!email.trim()) {
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập email.");
+      return;
+    }
+    if (!password) {
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập mật khẩu.");
+      return;
+    }
+    if (isEmailInvalid) {
+      return;
+    }
+
     mutate(
-      { username: email, password },
+      { email, password },
       {
         onSuccess: async (data) => {
           const role = data.role;
@@ -29,6 +51,7 @@ export default function LoginScreen() {
 
           if (token) {
             await AsyncStorage.setItem("accessToken", token);
+            await AsyncStorage.setItem("email", email.trim());
           }
 
           if (role === "admin") {
@@ -45,8 +68,7 @@ export default function LoginScreen() {
   };
 
   const onLoginGoogle = () => {
-    console.log("Đăng nhập với Google");
-    // TODO: gắn expo-auth-session sau
+    // Để trống theo yêu cầu huỷ bỏ
   };
 
   const goToRegister = () => {
@@ -59,65 +81,96 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.center}>
-        <View style={styles.card}>
-          <Image
-            source={require("../../../assets/images/logo_coco.png")}
-            style={styles.logo}
-          />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.center}>
+            <View style={styles.card}>
+              <Image
+                source={require("../../../assets/images/logo_coco.png")}
+                style={styles.logo}
+              />
 
-          <TextInput
-            placeholder="Địa chỉ email"
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            placeholderTextColor="#9CA3AF"
-          />
+              <View style={[styles.inputWrapper, isEmailInvalid && styles.inputError]}>
+                <TextInput
+                  placeholder="Địa chỉ email"
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.inputField}
+                  placeholderTextColor="#9CA3AF"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+              {isEmailInvalid && (
+                <Text style={styles.errorText}>Email không đúng định dạng</Text>
+              )}
 
-          <TextInput
-            placeholder="Mật khẩu"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={styles.input}
-            placeholderTextColor="#9CA3AF"
-          />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  placeholder="Mật khẩu"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  style={styles.inputField}
+                  placeholderTextColor="#9CA3AF"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  style={styles.iconButton}
+                  accessibilityRole="button"
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
 
-          <TouchableOpacity style={styles.forgotWrap} onPress={forgetPassword}>
-            <Text style={styles.forgot}>Quên mật khẩu?</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.forgotWrap} onPress={forgetPassword}>
+                <Text style={styles.forgot}>Quên mật khẩu?</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.loginBtn}
-            onPress={handleLogin}
-            disabled={isPending}
-          >
-            <Text style={styles.loginText}>
-              {isPending ? "Đang đăng nhập..." : "ĐĂNG NHẬP"}
-            </Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.loginBtn}
+                onPress={handleLogin}
+                disabled={isPending || isEmailInvalid}
+              >
+                <Text style={styles.loginText}>
+                  {isPending ? "Đang đăng nhập..." : "ĐĂNG NHẬP"}
+                </Text>
+              </TouchableOpacity>
 
-          <Text style={styles.orText}>hoặc</Text>
+              {/* <Text style={styles.orText}>hoặc</Text>
 
-          <TouchableOpacity
-            style={[styles.socialBtn, styles.google]}
-            onPress={onLoginGoogle}
-          >
-            <Image
-              source={require("../../../assets/images/google.png")}
-              style={styles.socialIcon}
-            />
-            <Text style={styles.socialText}>Đăng nhập với Google</Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.socialBtn, styles.google]}
+                onPress={onLoginGoogle}
+              >
+                <Image
+                  source={require("../../../assets/images/google.png")}
+                  style={styles.socialIcon}
+                />
+                <Text style={styles.socialText}>Đăng nhập với Google</Text>
+              </TouchableOpacity> */}
 
-          <View style={styles.registerRow}>
-            <Text style={styles.registerText}>Bạn chưa có tài khoản? </Text>
-            <TouchableOpacity onPress={goToRegister}>
-              <Text style={styles.registerLink}>Đăng ký</Text>
-            </TouchableOpacity>
+              <View style={styles.registerRow}>
+                <Text style={styles.registerText}>Bạn chưa có tài khoản? </Text>
+                <TouchableOpacity onPress={goToRegister}>
+                  <Text style={styles.registerLink}>Đăng ký</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

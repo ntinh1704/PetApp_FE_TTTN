@@ -25,13 +25,37 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
 
-  input: {
+  inputWrapper: {
     width: "100%",
     height: 48,
     borderRadius: 10,
     backgroundColor: "#E5E7EB",
     paddingHorizontal: 14,
     marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  inputField: {
+    flex: 1,
+    height: "100%",
+  },
+
+  iconButton: {
+    paddingLeft: 8,
+  },
+
+  inputError: {
+    borderWidth: 1,
+    borderColor: "#EF4444",
+  },
+
+  errorText: {
+    width: "100%",
+    color: "#EF4444",
+    marginTop: -6,
+    marginBottom: 10,
+    fontSize: 12,
   },
 
   forgotWrap: {

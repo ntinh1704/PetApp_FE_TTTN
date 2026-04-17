@@ -1,13 +1,19 @@
+import { api, getImageUrl } from "@/app/services/api";
+import { uploadPetImageApi } from "@/app/services/authPet";
+import GenderDropdown from "@/app/utils/components/GenderDropdown";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
+  Modal,
   Platform,
   ScrollView,
   Text,
@@ -26,9 +32,21 @@ type UserProfile = {
   phone: string;
   email: string;
   address: string;
+  avatar: string;
 };
 
-type EditableField = keyof UserProfile;
+type EditableField = keyof Omit<UserProfile, "avatar">;
+
+type UserApi = {
+  id: number;
+  name?: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  avatar?: string | null;
+};
 
 const EMPTY_TEXT = "Chưa thiết lập";
 
@@ -54,14 +72,29 @@ const parseDob = (value: string) => {
   return new Date(year, month - 1, day);
 };
 
+const resolveDisplayName = (identifier?: string | null) => {
+  if (!identifier) return "Người dùng";
+  const trimmed = identifier.trim();
+  if (!trimmed) return "Người dùng";
+  return trimmed.includes("@") ? trimmed.split("@")[0] || "Người dùng" : trimmed;
+};
+
+const isEmailIdentifier = (identifier?: string | null) => {
+  if (!identifier) return false;
+  return identifier.includes("@");
+};
+
 export default function ProfileScreen() {
+  const [userId, setUserId] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
   const [profile, setProfile] = useState<UserProfile>({
-    name: "Nguyễn Văn A",
+    name: "",
     gender: "",
     dob: "",
-    phone: "0758519048",
-    email: "nguyenvana@gmail.com",
+    phone: "",
+    email: "",
     address: "",
+    avatar: "",
   });
 
   const [editingField, setEditingField] = useState<EditableField | null>(null);
@@ -71,8 +104,83 @@ export default function ProfileScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const updateField = (field: EditableField, value: string) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
+  const displayName = useMemo(() => {
+    return resolveDisplayName(email);
+  }, [profile.name, email]);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const cachedEmail = (await AsyncStorage.getItem("email")) ?? "";
+        setEmail(cachedEmail);
+
+        const usersRes = await api.get<any>("/users");
+        const users = Array.isArray(usersRes.data)
+          ? usersRes.data
+          : usersRes.data?.records ?? usersRes.data?.data ?? [];
+
+        const found = (users as UserApi[]).find(
+          (u) => String(u.email).trim() === cachedEmail.trim(),
+        );
+
+        if (!found) {
+          setProfile((prev) => ({
+            ...prev,
+            name: resolveDisplayName(cachedEmail),
+            email: cachedEmail,
+          }));
+          return;
+        }
+
+        setUserId(Number(found.id));
+        setProfile({
+          name: (found.name ?? "").trim() || resolveDisplayName(found.email),
+          gender: ((found.gender as UserProfile["gender"]) ?? "") || "",
+          dob: found.dob ?? "",
+          phone: found.phone ?? "",
+          email: found.email ?? "",
+          address: found.address ?? "",
+          avatar: found.avatar ?? "",
+        });
+      } catch {
+        const fallbackEmail = (await AsyncStorage.getItem("email")) ?? "";
+        setEmail(fallbackEmail);
+        setProfile((prev) => ({
+          ...prev,
+          name: resolveDisplayName(fallbackEmail),
+          email: fallbackEmail,
+        }));
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const saveProfile = async (nextProfile: UserProfile, successText?: string) => {
+    if (!userId) {
+      Alert.alert("Lỗi", "Không xác định được người dùng hiện tại.");
+      return false;
+    }
+
+    try {
+      await api.put("/users/", {
+        id: userId,
+        name: nextProfile.name.trim() || null,
+        gender: nextProfile.gender || null,
+        dob: nextProfile.dob.trim() || null,
+        phone: nextProfile.phone.trim() || null,
+        email: nextProfile.email.trim() || null,
+        address: nextProfile.address.trim() || null,
+        avatar: nextProfile.avatar || null,
+      });
+
+      setProfile(nextProfile);
+      if (successText) Alert.alert("Thành công", successText);
+      return true;
+    } catch {
+      Alert.alert("Lỗi", "Không thể cập nhật thông tin. Vui lòng thử lại.");
+      return false;
+    }
   };
 
   const openDobPicker = () => {
@@ -84,9 +192,10 @@ export default function ProfileScreen() {
     DateTimePickerAndroid.open({
       value: parseDob(profile.dob),
       mode: "date",
-      onChange: (_event: DateTimePickerEvent, selectedDate?: Date) => {
+      onChange: async (_event: DateTimePickerEvent, selectedDate?: Date) => {
         if (selectedDate) {
-          updateField("dob", formatDate(selectedDate));
+          const nextProfile = { ...profile, dob: formatDate(selectedDate) };
+          await saveProfile(nextProfile, "Đã cập nhật ngày sinh.");
         }
       },
     });
@@ -102,11 +211,40 @@ export default function ProfileScreen() {
     setDraftValue(profile[field]);
   };
 
-  const saveTextField = () => {
+  const saveTextField = async () => {
     if (!editingField) return;
-    updateField(editingField, draftValue.trim());
-    setEditingField(null);
-    Alert.alert("Thành công", "Đã cập nhật thông tin.");
+    if (!draftValue.trim()) {
+      Alert.alert("Thiếu thông tin", "Trường này không được để trống.");
+      return;
+    }
+    const nextProfile = { ...profile, [editingField]: draftValue.trim() } as UserProfile;
+    const ok = await saveProfile(nextProfile, "Đã cập nhật thông tin.");
+    if (ok) setEditingField(null);
+  };
+
+  const pickAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (result.canceled) return;
+    const uri = result.assets[0]?.uri;
+    if (!uri) return;
+
+    try {
+      const { url } = await uploadPetImageApi(uri);
+      const nextProfile = { ...profile, avatar: url };
+      await saveProfile(nextProfile, "Đã cập nhật ảnh đại diện.");
+    } catch (error: any) {
+      const detail =
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Không thể tải ảnh lên.";
+      Alert.alert("Lỗi", String(detail));
+    }
   };
 
   const openChangePassword = () => {
@@ -116,11 +254,7 @@ export default function ProfileScreen() {
     setConfirmPassword("");
   };
 
-  const cancelChangePassword = () => {
-    setShowChangePassword(false);
-  };
-
-  const saveNewPassword = () => {
+  const saveNewPassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert("Thiếu thông tin", "Vui lòng nhập đầy đủ mật khẩu.");
       return;
@@ -136,11 +270,21 @@ export default function ProfileScreen() {
       return;
     }
 
-    setShowChangePassword(false);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    Alert.alert("Thành công", "Đổi mật khẩu thành công.");
+    if (!userId) {
+      Alert.alert("Lỗi", "Không xác định được người dùng hiện tại.");
+      return;
+    }
+
+    try {
+      await api.put("/users/", { id: userId, password: newPassword });
+      setShowChangePassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      Alert.alert("Thành công", "Đổi mật khẩu thành công.");
+    } catch {
+      Alert.alert("Lỗi", "Không thể đổi mật khẩu.");
+    }
   };
 
   const renderInfoRow = (
@@ -172,6 +316,11 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleSignOut = async () => {
+    await AsyncStorage.multiRemove(["accessToken", "email", "cart_items"]);
+    router.replace("/screens/auth/LoginScreen/Login");
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
@@ -188,29 +337,52 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <Image
-          source={{
-            uri: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
-          }}
-          style={styles.cover}
-        />
-
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
-            <Text style={styles.name}>{profile.name || "Người dùng"}</Text>
-
-            <TouchableOpacity
-              style={styles.signOut}
-              activeOpacity={0.7}
-              onPress={() => router.replace("/screens/auth/LoginScreen/Login")}
-            >
-              <Ionicons name="log-out-outline" size={16} color="#EF4444" />
-              <Text style={styles.signOutText}>Đăng xuất</Text>
+            <TouchableOpacity style={styles.avatarWrap} onPress={pickAvatar} activeOpacity={0.85}>
+              <Image
+                source={
+                  profile.avatar
+                    ? { uri: getImageUrl(profile.avatar) }
+                    : require("@/app/assets/images/no_avt.jpg")
+                }
+                style={styles.avatar}
+              />
+              <View style={styles.avatarEditIcon}>
+                <Ionicons name="pencil" size={12} color="#FFF" />
+              </View>
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={styles.signOut}
+            activeOpacity={0.7}
+            onPress={handleSignOut}
+          >
+            <Ionicons name="log-out-outline" size={16} color="#EF4444" />
+            <Text style={styles.signOutText}>Đăng xuất</Text>
+          </TouchableOpacity>
+
           {renderInfoRow("name", "person-outline", "Tên", profile.name)}
-          {renderInfoRow("gender", "male-female-outline", "Giới tính", profile.gender)}
+
+          {/* Giới tính - Dropdown inline */}
+          <View style={[styles.profileRow, { zIndex: 10 }]}>
+            <View style={styles.profileRowLeft}>
+              <Ionicons name="male-female-outline" size={16} color="#4B5563" />
+              <Text style={styles.profileLabel}>Giới tính</Text>
+            </View>
+            <GenderDropdown
+              value={profile.gender}
+              options={["Nam", "Nữ", "Khác"]}
+              placeholder="Chọn"
+              onSelect={async (v) => {
+                const nextProfile = { ...profile, gender: v as any };
+                await saveProfile(nextProfile, "Đã cập nhật giới tính.");
+              }}
+              style={{ minWidth: 120 }}
+            />
+          </View>
+
           {renderInfoRow("dob", "calendar-outline", "Ngày sinh", profile.dob)}
           {renderInfoRow("phone", "call-outline", "Số điện thoại", profile.phone)}
           {renderInfoRow("email", "mail-outline", "Email", profile.email)}
@@ -218,7 +390,22 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.securityCard}>
-          <Text style={styles.securityTitle}>Bảo mật</Text>
+          <Text style={styles.securityTitle}>Tiện ích</Text>
+
+          {/* Chat với AI */}
+          {/* <TouchableOpacity
+            style={styles.securityRow}
+            activeOpacity={0.8}
+            onPress={() => router.push("/screens/user/stack/ChatScreen/ChatScreen")}
+          >
+            <View style={styles.securityLeft}>
+              <Ionicons name="chatbubble-outline" size={16} color="#4B5563" />
+              <Text style={styles.securityLabel}>Chat với AI</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+          </TouchableOpacity> */}
+
+          {/* Đổi mật khẩu */}
           <TouchableOpacity
             style={styles.securityRow}
             activeOpacity={0.8}
@@ -231,10 +418,20 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
+      </ScrollView>
 
-        {editingField && editingField !== "gender" && (
-          <View style={styles.formCard}>
-            <Text style={styles.formTitle}>{UPDATE_TITLES[editingField]}</Text>
+      {/* ===== MODAL: Edit text field ===== */}
+      <Modal
+        animationType="fade"
+        transparent
+        visible={!!editingField && editingField !== "gender"}
+        onRequestClose={() => setEditingField(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {editingField ? UPDATE_TITLES[editingField] : ""}
+            </Text>
             <TextInput
               style={styles.input}
               value={draftValue}
@@ -243,9 +440,9 @@ export default function ProfileScreen() {
               placeholderTextColor="#9CA3AF"
               keyboardType={editingField === "phone" ? "phone-pad" : editingField === "email" ? "email-address" : "default"}
               autoCapitalize={editingField === "email" ? "none" : "sentences"}
+              autoFocus
             />
-
-            <View style={styles.formActions}>
+            <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.formBtn, styles.cancelBtn]}
                 onPress={() => setEditingField(null)}
@@ -262,37 +459,21 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        </View>
+      </Modal>
 
-        {editingField === "gender" && (
-          <View style={styles.formCard}>
-            <Text style={styles.formTitle}>Chọn giới tính</Text>
-            <View style={styles.genderOptions}>
-              {(["Nam", "Nữ", "Khác"] as const).map((option) => {
-                const active = profile.gender === option;
-                return (
-                  <TouchableOpacity
-                    key={option}
-                    style={[styles.genderOption, active && styles.genderOptionActive]}
-                    onPress={() => {
-                      updateField("gender", option);
-                      setEditingField(null);
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.genderOptionText, active && styles.genderOptionTextActive]}>
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
 
-        {showChangePassword && (
-          <View style={styles.formCard}>
-            <Text style={styles.formTitle}>Đổi mật khẩu</Text>
+
+      {/* ===== MODAL: Change password ===== */}
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showChangePassword}
+        onRequestClose={() => setShowChangePassword(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
             <TextInput
               style={styles.input}
               value={currentPassword}
@@ -317,11 +498,10 @@ export default function ProfileScreen() {
               placeholderTextColor="#9CA3AF"
               secureTextEntry
             />
-
-            <View style={styles.formActions}>
+            <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.formBtn, styles.cancelBtn]}
-                onPress={cancelChangePassword}
+                onPress={() => setShowChangePassword(false)}
                 activeOpacity={0.8}
               >
                 <Text style={styles.cancelBtnText}>Hủy</Text>
@@ -335,8 +515,8 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        )}
-      </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

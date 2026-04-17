@@ -1,5 +1,5 @@
 export type LoginPayload = {
-  username: string;
+  email: string;
   password: string;
 };
 
@@ -9,11 +9,27 @@ export type LoginResponse = {
 };
 
 export type RegisterPayload = {
-  username: string;
+  email: string;
   password: string;
+  name?: string;
   role: "user" | "admin";
 };
 
 export type RegisterResponse = {
   message: string;
+};
+
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
+export type VerifyOtpPayload = {
+  email: string;
+  otp: string;
+};
+
+export type ResetPasswordPayload = {
+  email: string;
+  otp: string;
+  new_password: string;
 };

@@ -96,7 +96,7 @@ export default function NotificationsScreen() {
       const rawText = notification.message || "";
 
       // Regex to parse bookingId for navigation
-      const idMatch = rawText.match(/#(\d+)/i) || rawText.match(/mã (\d+)/i);
+      const idMatch = rawText.match(/#(\d+)/i) || rawText.match(/mã\s*(?:#)?(\d+)/i);
       const extractedId = idMatch ? idMatch[1] : String(notification.booking_id || "");
       
       const lower = rawText.toLowerCase();

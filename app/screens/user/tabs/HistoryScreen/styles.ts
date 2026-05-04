@@ -5,6 +5,7 @@ export const GREEN = "#5CB15A";
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    backgroundColor: GREEN,
   },
 
   /* ===== HEADER ===== */
@@ -31,6 +32,12 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+  },
+
+  /* ===== CONTENT ===== */
+  content: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
   },
 
   filterRow: {

@@ -2,10 +2,12 @@ import { StyleSheet, Dimensions } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+const GREEN = "#5CB15A";
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: GREEN,
   },
   header: {
     flexDirection: "row",
@@ -13,7 +15,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#5CB15A",
+    backgroundColor: GREEN,
   },
   backBtn: {
     padding: 4,
@@ -32,7 +34,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
+    flexGrow: 1,
     paddingBottom: 100,
+    backgroundColor: "#F3F4F6",
   },
 
   // Gallery

@@ -14,7 +14,7 @@ export default function PaymentQRScreen() {
   const ACCOUNT_NO = "96247TNT171004";
   const ACCOUNT_NAME = "TRAN NHAT TINH";
   
-  // Format content strictly to match Webhook expectation (KLTN + id)
+  // Format content strictly to match Webhook expectation 
   const content = `BK${bookingId}`;
   
   // Sử dụng SePay's official QR code generator để đảm bảo nội dung chuyển khoản được điền sẵn:
@@ -139,7 +139,7 @@ export default function PaymentQRScreen() {
       </View>
 
       <ScrollView 
-        style={{ flex: 1 }} 
+        style={{ flex: 1, backgroundColor: "#F3F4F6" }} 
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -194,6 +194,9 @@ export default function PaymentQRScreen() {
           </Text>
         </View>
 
+      </ScrollView>
+
+      <View style={styles.bottomBar}>
         <TouchableOpacity 
           style={styles.completeBtn} 
           activeOpacity={0.8}
@@ -201,7 +204,7 @@ export default function PaymentQRScreen() {
         >
           <Text style={styles.completeBtnText}>Tôi đã chuyển khoản hoàn tất</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

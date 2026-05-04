@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -54,7 +54,13 @@ const toTimestamp = (item: any) => {
 
 export default function HistoryScreen() {
   const [activeFilter, setActiveFilter] = useState("Tất cả");
-  const { data: bookings, isLoading } = useBookings();
+  const { data: bookings, isLoading, refetch } = useBookings();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const historyItems = useMemo(() => {
     const list: any[] = Array.isArray(bookings)
@@ -67,11 +73,16 @@ export default function HistoryScreen() {
       const rawStatus = (item.status ?? "").toString().trim().toLowerCase();
       const statusMap: Record<string, HistoryStatus> = {
         pending: "Đang xác nhận",
+        "đang xác nhận": "Đang xác nhận",
         confirmed: "Đã xác nhận",
+        "đã xác nhận": "Đã xác nhận",
         cancel_requested: "Đang xin hủy",
+        "đang xin hủy": "Đang xin hủy",
         completed: "Hoàn thành",
+        "hoàn thành": "Hoàn thành",
         cancelled: "Đã hủy",
         canceled: "Đã hủy",
+        "đã hủy": "Đã hủy",
         "chờ thanh toán": "Đang xác nhận",
         "đã thanh toán": "Đã xác nhận",
       };
@@ -80,7 +91,7 @@ export default function HistoryScreen() {
 
       return {
         id: String(item.id),
-        title: item.service_name || "Dịch vụ",
+        title: `#${item.id} - ${item.service_name || "Dịch vụ"}`,
         subtitle: `Thú cưng: ${item.pet_name || `#${item.pet_id}`}`,
         date: formatDateDisplay(item.booking_date),
         time: formatTimeDisplay(item.booking_time),
@@ -109,68 +120,71 @@ export default function HistoryScreen() {
         <CartBadge color="#FFF" size={22} containerStyle={styles.notiBtn}/>
       </View>
 
-      {/* ===== FILTER BAR ===== */}
-      <View style={styles.filterRow}>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-        >
-          {filters.map((item) => {
-          const isActive = activeFilter === item;
-          return (
-            <TouchableOpacity
-              key={item}
-              onPress={() => setActiveFilter(item)}
-              style={[styles.filterChip, isActive && styles.filterChipActive]}
-            >
-              <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
-                {item}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-        </ScrollView>
-      </View>
-
-      {/* ===== LIST ===== */}
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            {isLoading ? "Đang tải lịch sử..." : "Chưa có lịch sử đặt lịch"}
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={styles.card} 
-            activeOpacity={0.7}
-            onPress={() => router.push({
-              pathname: "/screens/user/stack/UserBookingDetail/BookingDetail",
-              params: { bookingId: item.id }
-            })}
+      {/* ===== CONTENT ===== */}
+      <View style={styles.content}>
+        {/* ===== FILTER BAR ===== */}
+        <View style={styles.filterRow}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={{ paddingHorizontal: 16 }}
           >
-            <View style={styles.cardLeft}>
-              <View style={styles.iconBox}>
-                <Ionicons name={item.icon as any} size={22} color={GREEN} />
-              </View>
-
-              <View>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-                <Text style={styles.cardDate}>
-                  {item.time ? `${item.date} • ${item.time}` : item.date}
+            {filters.map((item) => {
+            const isActive = activeFilter === item;
+            return (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setActiveFilter(item)}
+                style={[styles.filterChip, isActive && styles.filterChipActive]}
+              >
+                <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                  {item}
                 </Text>
-              </View>
-            </View>
+              </TouchableOpacity>
+            );
+          })}
+          </ScrollView>
+        </View>
 
-            <StatusBadge status={item.status} />
-          </TouchableOpacity>
-        )}
-      />
+        {/* ===== LIST ===== */}
+        <FlatList
+          data={filteredData}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              {isLoading ? "Đang tải lịch sử..." : "Chưa có lịch sử đặt lịch"}
+            </Text>
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity 
+              style={styles.card} 
+              activeOpacity={0.7}
+              onPress={() => router.push({
+                pathname: "/screens/user/stack/UserBookingDetail/BookingDetail",
+                params: { bookingId: item.id }
+              })}
+            >
+              <View style={styles.cardLeft}>
+                <View style={styles.iconBox}>
+                  <Ionicons name={item.icon as any} size={22} color={GREEN} />
+                </View>
+
+                <View>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+                  <Text style={styles.cardDate}>
+                    {item.time ? `${item.date} • ${item.time}` : item.date}
+                  </Text>
+                </View>
+              </View>
+
+              <StatusBadge status={item.status} />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
 }

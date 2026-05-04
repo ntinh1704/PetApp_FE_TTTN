@@ -9,6 +9,11 @@ export default StyleSheet.create({
     padding: 12,
     paddingBottom: 40,
   },
+  containerNoPadTop: {
+    padding: 12,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
   header: {
     backgroundColor: "#5CB15A",
     flexDirection: "row",
@@ -23,6 +28,8 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    marginHorizontal: 12,
+    marginTop: 12,
   },
   headerLeft: {
     flexDirection: "row",
@@ -70,16 +77,53 @@ export default StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
+  userNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
   userName: {
     fontSize: 15,
     fontWeight: "600",
     color: "#111827",
   },
-  userInfo: {
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  infoLabel: {
+    width: "30%",
     fontSize: 14,
     fontWeight: "500",
-    color: "#374151",
-    marginBottom: 4,
+    color: "#6B7280",
+  },
+  infoValue: {
+    width: "70%",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusBadgeActive: {
+    backgroundColor: "#D1FAE5",
+  },
+  statusBadgeInactive: {
+    backgroundColor: "#FEE2E2",
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  statusTextActive: {
+    color: "#065F46",
+  },
+  statusTextInactive: {
+    color: "#991B1B",
   },
   actionRow: {
     marginTop: 12,
@@ -121,10 +165,20 @@ export default StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
   },
+  deleteBtnRestore: {
+    backgroundColor: "#5CB15A",
+  },
   deleteBtnText: {
     fontSize: 13,
     fontWeight: "700",
     color: "#DC2626",
+    marginLeft: 4,
+  },
+  deleteBtnTextRestore: {
+    color: "#FFFFFF",
+  },
+  disabledOpacity: {
+    opacity: 0.5,
   },
   stateText: {
     textAlign: "center",
@@ -133,3 +187,4 @@ export default StyleSheet.create({
     fontSize: 14,
   },
 });
+

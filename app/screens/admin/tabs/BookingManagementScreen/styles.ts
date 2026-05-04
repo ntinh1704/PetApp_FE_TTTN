@@ -9,6 +9,11 @@ export default StyleSheet.create({
     padding: 12,
     paddingBottom: 40,
   },
+  containerNoPadTop: {
+    padding: 12,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
   header: {
     backgroundColor: "#5CB15A",
     flexDirection: "row",
@@ -23,6 +28,8 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    marginHorizontal: 12,
+    marginTop: 12,
   },
   headerLeft: {
     flexDirection: "row",
@@ -93,17 +100,26 @@ export default StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  bookingInfo: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 6,
-  },
-  statusRow: {
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    marginBottom: 8,
+  },
+  infoLabel: {
+    width: "25%",
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+  },
+  infoValue: {
+    width: "75%",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  statusBadgeContainer: {
+    flex: 1,
+    alignItems: "flex-start",
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -165,6 +181,23 @@ export default StyleSheet.create({
     textAlign: "center",
     marginVertical: 8,
   },
+  cancelReasonContainer: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#FCA5A5",
+  },
+  cancelReasonTitle: {
+    color: "#DC2626",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  cancelReasonText: {
+    color: "#DC2626",
+    marginTop: 4,
+  },
   tagsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -193,13 +226,13 @@ export default StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 12,
   },
   modalContent: {
     backgroundColor: "#FFF",
     borderRadius: 16,
     width: "100%",
-    padding: 20,
+    padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -209,6 +242,7 @@ export default StyleSheet.create({
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
     gap: 10,
   },
@@ -216,6 +250,7 @@ export default StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#111827",
+    textAlign: "center",
   },
   modalInput: {
     borderWidth: 1,
@@ -252,5 +287,14 @@ export default StyleSheet.create({
   modalButtonConfirmText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  actionTextBlue: {
+    color: "#2563EB",
+  },
+  actionTextRed: {
+    color: "#DC2626",
+  },
+  actionTextGreen: {
+    color: "#16A34A",
   },
 });

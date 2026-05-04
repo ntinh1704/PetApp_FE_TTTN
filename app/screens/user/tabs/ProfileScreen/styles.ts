@@ -5,6 +5,7 @@ const GREEN = "#5CB15A";
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    backgroundColor: GREEN,
   },
 
   header: {

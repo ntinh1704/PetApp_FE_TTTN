@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5E7EB",
     paddingHorizontal: 14,
     marginBottom: 12,
+    color: "#000000",
   },
 
   inputWrapper: {
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
   inputField: {
     flex: 1,
     height: "100%",
+    color: "#000000",
   },
 
   iconButton: {
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 2,
     marginBottom: 12,
+    color: "#000000",
   },
 
   sendBtn: {

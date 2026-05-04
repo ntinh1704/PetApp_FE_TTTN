@@ -1,9 +1,11 @@
 import { StyleSheet } from "react-native";
 
+const GREEN = "#5CB15A";
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    // backgroundColor: "#F9FAFB",
+    backgroundColor: GREEN,
   },
   header: {
     flexDirection: "row",
@@ -11,7 +13,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#5CB15A",
+    backgroundColor: GREEN,
   },
   backBtn: {
     padding: 4,
@@ -35,6 +37,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
+    backgroundColor: "#F3F4F6",
   },
   emptyTitle: {
     fontSize: 20,
@@ -63,8 +66,10 @@ export const styles = StyleSheet.create({
 
   // List
   listContent: {
+    flexGrow: 1,
     padding: 16,
     paddingBottom: 8,
+    backgroundColor: "#F3F4F6",
   },
   itemCard: {
     flexDirection: "row",

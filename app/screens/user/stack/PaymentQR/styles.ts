@@ -1,9 +1,11 @@
 import { StyleSheet } from "react-native";
 
+const GREEN = "#5CB15A";
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#F5F7F9",
+    backgroundColor: GREEN,
   },
   header: {
     height: 56,
@@ -11,7 +13,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#5CB15A",
+    backgroundColor: GREEN,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
   },
@@ -22,6 +24,7 @@ export const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 100,
     alignItems: "center",
   },
   instruction: {
@@ -90,12 +93,13 @@ export const styles = StyleSheet.create({
     paddingTop: 12,
   },
   completeBtn: {
-    backgroundColor: "#5CB15A",
-    width: "100%",
-    paddingVertical: 16,
-    borderRadius: 12,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 24,
+    justifyContent: "center",
+    backgroundColor: "#5CB15A",
+    borderRadius: 14,
+    paddingVertical: 14,
+    gap: 8,
   },
   completeBtnText: {
     color: "#FFF",
@@ -122,5 +126,22 @@ export const styles = StyleSheet.create({
   },
   countdownDanger: {
     color: "#DC2626",
+  },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingBottom: 30,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: -2 },
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

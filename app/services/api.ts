@@ -2,14 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 export const api = axios.create({
-  // baseURL: "http://192.168.53.203:8000",
+  // baseURL: "http://192.168.2.114:8000",
   // baseURL: "http://10.146.41.203:8000",
-  baseURL: "http://10.10.1.63:8000",
-  // baseURL: "https://edra-causational-shari.ngrok-free.dev",
-
+  // baseURL: "http://10.10.1.63:8000",
+  // baseURL: "http:10.1.249.150:8000",
+  
+  baseURL: "https://edra-causational-shari.ngrok-free.dev",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 

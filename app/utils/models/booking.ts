@@ -16,6 +16,19 @@ export interface Booking {
   total_price: number;
   payment_method?: string | null;
   created_at?: string | null;
+  staff_id?: number | null;
+  staff_name?: string | null;
+  services_detail?: BookingServiceDetail[];
+}
+
+export interface BookingServiceDetail {
+  id: number;
+  service_id: number;
+  service_name: string;
+  price: number;
+  quantity: number;
+  is_addon: boolean;
+  subtotal: number;
 }
 
 export interface BookingCreate {
@@ -28,6 +41,7 @@ export interface BookingCreate {
   note?: string | null;
   total_price?: number | null;
   payment_method?: string | null;
+  staff_id?: number | null;
 }
 
 export interface BookingUpdate {
@@ -35,4 +49,5 @@ export interface BookingUpdate {
   status?: string;
   note?: string | null;
   cancel_reason?: string | null;
+  staff_id?: number | null;
 }

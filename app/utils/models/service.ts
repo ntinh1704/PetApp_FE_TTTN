@@ -5,6 +5,7 @@ export interface Service {
   icon?: string | null;
   price?: number | null;
   duration?: number | null;
+  is_quantifiable?: boolean | null;
   images?: string[] | null;
   created_at?: string | null;
 }
@@ -15,6 +16,7 @@ export interface ServiceCreate {
   icon?: string | null;
   price?: number | null;
   duration?: number | null;
+  is_quantifiable?: boolean | null;
   images?: string[] | null;
 }
 
@@ -25,6 +27,7 @@ export interface ServiceUpdate {
   icon?: string | null;
   price?: number | null;
   duration?: number | null;
+  is_quantifiable?: boolean | null;
   images?: string[] | null;
 }
 

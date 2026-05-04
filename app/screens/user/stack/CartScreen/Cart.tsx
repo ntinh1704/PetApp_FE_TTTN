@@ -80,6 +80,21 @@ export default function CartScreen() {
     });
   };
 
+  const handleClearCart = () => {
+    Alert.alert(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa toàn bộ dịch vụ trong giỏ hàng không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        { 
+          text: "Xóa tất cả", 
+          style: "destructive", 
+          onPress: () => clearCart() 
+        },
+      ]
+    );
+  };
+
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN") + " đ";
   };
@@ -141,8 +156,12 @@ export default function CartScreen() {
           </TouchableOpacity>
           <Text style={styles.qtyText}>{item.quantity}</Text>
           <TouchableOpacity
-            style={styles.qtyBtn}
+            style={[
+              styles.qtyBtn,
+              !item.service.is_quantifiable && item.quantity >= 1 ? { opacity: 0.3 } : null
+            ]}
             onPress={() => updateQuantity(item.service.id, item.quantity + 1)}
+            disabled={!item.service.is_quantifiable && item.quantity >= 1}
           >
             <Ionicons name="add" size={16} color="#333" />
           </TouchableOpacity>
@@ -165,7 +184,7 @@ export default function CartScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Giỏ hàng ({items.length})</Text>
         {items.length > 0 && (
-          <TouchableOpacity onPress={clearCart}>
+          <TouchableOpacity onPress={handleClearCart}>
             <Text style={styles.clearText}>Xóa tất cả</Text>
           </TouchableOpacity>
         )}

@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, Dimensions, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LineChart } from "react-native-chart-kit";
 import styles, { chartConfig } from "./styles";
@@ -16,6 +16,7 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export default function DashboardScreen() {
   const [chartMode, setChartMode] = useState<"week" | "month" | "year">("week");
+  const [scheduleDate, setScheduleDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const navigation = useNavigation();
 
   const { data: usersData, isLoading: isUsersLoading } = useUsers();
@@ -67,7 +68,22 @@ export default function DashboardScreen() {
       })
       .slice(0, 5);
 
-    return { totalBookings, revenue, recentBookings, todayBookingsCount, todayRevenue };
+    // Group bookings by date for the schedule view, only pending/confirmed/paid/completed
+    const scheduleByDate: Record<string, Booking[]> = {};
+    bookings.forEach((b) => {
+       const bStatus = (b.status || "").toLowerCase();
+       if (
+         bStatus === "pending" || bStatus === "chờ thanh toán" ||
+         bStatus === "confirmed" || bStatus === "đã xác nhận" ||
+         bStatus === "paid" || bStatus === "đã thanh toán" ||
+         bStatus === "completed" || bStatus === "hoàn thành"
+       ) {
+         if (!scheduleByDate[b.booking_date]) scheduleByDate[b.booking_date] = [];
+         scheduleByDate[b.booking_date].push(b);
+       }
+    });
+
+    return { totalBookings, revenue, recentBookings, todayBookingsCount, todayRevenue, scheduleByDate };
   }, [bookingsData]);
 
   const chartData = useMemo(() => {
@@ -144,16 +160,40 @@ export default function DashboardScreen() {
     return chartData.data.length > 0 && chartData.data.every((v) => v === 0);
   }, [chartData.data]);
 
+  const scheduleDays = useMemo(() => {
+    const days = [];
+    const today = new Date();
+    for(let i=0; i<7; i++){
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      days.push({
+        dateStr: d.toISOString().split("T")[0],
+        dayName: i === 0 ? "Hôm nay" : d.toLocaleDateString("vi-VN", { weekday: "short" }),
+        dayNum: d.getDate(),
+      });
+    }
+    return days;
+  }, []);
+
+  const selectedScheduleBookings = useMemo(() => {
+    const list = stats.scheduleByDate[scheduleDate] || [];
+    return [...list].sort((a,b) => {
+       const timeA = a.booking_time ? new Date(`1970-01-01T${a.booking_time}`).getTime() : 0;
+       const timeB = b.booking_time ? new Date(`1970-01-01T${b.booking_time}`).getTime() : 0;
+       return timeA - timeB;
+    });
+  }, [stats.scheduleByDate, scheduleDate]);
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={[styles.header, { marginHorizontal: 12, marginTop: 12 }]}>
+      <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Pressable
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
             <Ionicons name="menu" size={20} color="#FFF" />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Dashboard</Text>
         </View>
 
@@ -170,46 +210,115 @@ export default function DashboardScreen() {
           )}
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: 0 }]}>
+      <ScrollView contentContainerStyle={styles.containerNoPadTop}>
 
         {isLoading ? (
-          <View style={{ alignItems: "center", marginTop: 40, gap: 10 }}>
+          <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#5CB15A" />
-            <Text style={{ color: "#6B7280", fontSize: 14, fontWeight: "600" }}>Đang tải dữ liệu...</Text>
+            <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
           </View>
         ) : (
           <View style={styles.statGrid}>
-            <View style={styles.statCard}>
-              <View style={styles.statLabel}>
-                <Ionicons name="calendar-outline" size={16} color="#111827" />
-                <Text style={styles.statText}>Lịch hẹn hôm nay</Text>
+            <View style={styles.statRow}>
+              <View style={styles.statCard}>
+                <View style={styles.statLabel}>
+                  <Ionicons name="calendar-outline" size={16} color="#111827" />
+                  <Text style={styles.statText}>Lịch hẹn hôm nay</Text>
+                </View>
+                <Text style={styles.statValue}>{stats.todayBookingsCount}</Text>
               </View>
-              <Text style={styles.statValue}>{stats.todayBookingsCount}</Text>
+              <View style={styles.statCard}>
+                <View style={styles.statLabel}>
+                  <Ionicons name="cash-outline" size={16} color="#111827" />
+                  <Text style={styles.statText}>Doanh thu hôm nay</Text>
+                </View>
+                <Text style={styles.statValue}>
+                  {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(stats.todayRevenue)}
+                </Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <View style={styles.statLabel}>
-                <Ionicons name="cash-outline" size={16} color="#111827" />
-                <Text style={styles.statText}>Doanh thu hôm nay</Text>
+
+            <View style={styles.statRow}>
+              <View style={styles.statCard}>
+                <View style={styles.statLabel}>
+                  <Ionicons name="calendar" size={16} color="#111827" />
+                  <Text style={styles.statText}>Tổng lịch đặt</Text>
+                </View>
+                <Text style={styles.statValue}>{stats.totalBookings}</Text>
               </View>
-              <Text style={styles.statValue}>
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(stats.todayRevenue)}
-              </Text>
+              <View style={styles.statCard}>
+                <View style={styles.statLabel}>
+                  <Ionicons name="cash" size={16} color="#111827" />
+                  <Text style={styles.statText}>Tổng doanh thu</Text>
+                </View>
+                <Text style={styles.statValue}>
+                  {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(stats.revenue)}
+                </Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <View style={styles.statLabel}>
-                <Ionicons name="calendar" size={16} color="#111827" />
-                <Text style={styles.statText}>Tổng lịch đặt</Text>
-              </View>
-              <Text style={styles.statValue}>{stats.totalBookings}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <View style={styles.statLabel}>
-                <Ionicons name="cash" size={16} color="#111827" />
-                <Text style={styles.statText}>Tổng doanh thu</Text>
-              </View>
-              <Text style={styles.statValue}>
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(stats.revenue)}
-              </Text>
+          </View>
+        )}
+
+        {!isLoading && (
+          <View style={styles.section}>
+            <Text style={styles.scheduleSectionTitle}>Lịch làm việc (7 ngày)</Text>
+            
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scheduleDaysScroll}>
+              {scheduleDays.map((d) => {
+                const isActive = d.dateStr === scheduleDate;
+                return (
+                  <TouchableOpacity 
+                    key={d.dateStr} 
+                    style={[styles.scheduleDayBtn, isActive && styles.scheduleDayBtnActive]}
+                    onPress={() => setScheduleDate(d.dateStr)}
+                  >
+                    <Text style={[styles.scheduleDayName, isActive && styles.scheduleDayNameActive]}>{d.dayName}</Text>
+                    <Text style={[styles.scheduleDayNum, isActive && styles.scheduleDayNumActive]}>{d.dayNum}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <View style={styles.scheduleCard}>
+              {selectedScheduleBookings.length > 0 ? (
+                selectedScheduleBookings.map((b) => {
+                  const formatTime = (timeStr?: string) => {
+                    if (!timeStr) return "";
+                    const parts = timeStr.includes("T") ? timeStr.split("T")[1].split(":") : timeStr.split(":");
+                    return `${parts[0]}:${parts[1]}`;
+                  };
+
+                  const isCompleted = b.status?.toLowerCase() === "hoàn thành" || b.status?.toLowerCase() === "completed";
+
+                  return (
+                    <View key={b.id} style={styles.scheduleRow}>
+                      <View style={styles.scheduleTimeCol}>
+                        <Text style={styles.scheduleTimeText}>{formatTime(b.booking_time)}</Text>
+                      </View>
+                      <View style={[styles.scheduleBar, isCompleted ? styles.scheduleBarCompleted : styles.scheduleBarPending]} />
+                      <View style={styles.scheduleInfoCol}>
+                        <Text style={styles.schedulePetName}>{b.pet_name || "Thú cưng"}</Text>
+                        <Text style={styles.scheduleServiceName}>{b.service_names?.join(", ") || b.service_name}</Text>
+                        <View style={styles.scheduleStaffRow}>
+                          <Ionicons name="person-circle-outline" size={14} color="#6B7280" style={styles.scheduleStaffIcon} />
+                          <Text style={styles.scheduleStaffText}>NV: {b.staff_name || "Cửa hàng"}</Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity 
+                        style={styles.scheduleDetailBtn}
+                        onPress={() => router.push({ pathname: "/screens/admin/BookingDetail/BookingDetail", params: { bookingId: String(b.id) } })}
+                      >
+                        <Text style={styles.scheduleDetailBtnText}>Chi tiết</Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })
+              ) : (
+                <View style={styles.scheduleEmptyContainer}>
+                  <Ionicons name="calendar-clear-outline" size={40} color="#D1D5DB" />
+                  <Text style={styles.scheduleEmptyText}>Không có lịch hẹn ngày này</Text>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -273,22 +382,6 @@ export default function DashboardScreen() {
           />
         </View>
 
-        {!isLoading && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Lịch đặt gần đây</Text>
-            {stats.recentBookings.length > 0 ? (
-              stats.recentBookings.map((b) => (
-                <View key={b.id} style={styles.recentItem}>
-                  <Text style={styles.recentText}>
-                    {b.user_name || `#${b.user_id}`} - {b.service_names?.join(", ") || b.service_name || "Dịch vụ"}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 10 }}>Chưa có lịch đặt nào</Text>
-            )}
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -5,6 +5,7 @@ export const GREEN = "#5CB15A";
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    backgroundColor: GREEN,
   },
 
   /* Header */
@@ -25,7 +26,9 @@ export const styles = StyleSheet.create({
 
   /* Content */
   content: {
+    flexGrow: 1,
     padding: 16,
+    backgroundColor: "#F3F4F6",
   },
 
   avatarWrap: {
@@ -81,17 +84,29 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  footer: {
+    padding: 16,
+    backgroundColor: "#FFF",
+    borderTopWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  footerButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
   button: {
-    backgroundColor: "#6BC46D",
-    height: 46,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: "#5CB15A",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
+    flex: 1,
   },
 
   buttonText: {
     color: "#fff",
-    fontWeight: "900",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

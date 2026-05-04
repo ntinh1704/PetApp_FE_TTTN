@@ -3,7 +3,7 @@ import { Booking } from "@/app/utils/models/booking";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
-import { Modal, TextInput, Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Modal, TextInput, Alert, ScrollView, Text, TouchableOpacity, View, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
@@ -142,18 +142,23 @@ export default function BookingManagementScreen() {
   };
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={[styles.header, { marginHorizontal: 12, marginTop: 12 }]}>
+      <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Pressable
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
             <Ionicons name="menu" size={20} color="#FFF" />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Quản lý đặt lịch</Text>
         </View>
       </View>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: 0 }]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={styles.containerNoPadTop}>
+
 
         <TextInput
           placeholder="Tìm lịch đặt..."
@@ -195,28 +200,53 @@ export default function BookingManagementScreen() {
 
             return (
               <View key={item.id} style={styles.bookingCard}>
-                <Text style={styles.bookingInfo}>Khách: {item.user_name || `#${item.user_id}`}</Text>
-                <Text style={styles.bookingInfo}>Thú cưng: {item.pet_name || `#${item.pet_id}`}</Text>
-                <Text style={styles.bookingInfo}>
-                  Dịch vụ: {item.service_names?.join(", ") || item.service_name || "Chưa rõ"}
-                </Text>
-                <Text style={styles.bookingInfo}>Ngày: {formatDateDisplay(item.booking_date)}</Text>
-                <Text style={styles.bookingInfo}>Giờ: {formatTimeDisplay(item.booking_time)}</Text>
-                <View style={styles.statusRow}>
-                  <Text style={styles.bookingInfo}>Trạng thái:</Text>
-                  <View style={[styles.statusBadge, getStatusStyles(statusKey).badge]}>
-                    <Text style={[styles.statusBadgeText, { color: getStatusStyles(statusKey).color }]}>
-                      {statusVi}
-                    </Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Mã lịch:</Text>
+                  <Text style={[styles.infoValue, { fontWeight: "bold", fontSize: 16 }]}>#{item.id}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Khách:</Text>
+                  <Text style={styles.infoValue}>{item.user_name || `#${item.user_id}`}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Thú cưng:</Text>
+                  <Text style={styles.infoValue}>{item.pet_name || `#${item.pet_id}`}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Dịch vụ:</Text>
+                  <Text style={styles.infoValue}>
+                    {item.service_names?.join(", ") || item.service_name || "Chưa rõ"}
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Nhân viên:</Text>
+                  <Text style={styles.infoValue}>{item.staff_name || "Cửa hàng sắp xếp"}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Ngày:</Text>
+                  <Text style={styles.infoValue}>{formatDateDisplay(item.booking_date)}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Giờ:</Text>
+                  <Text style={styles.infoValue}>{formatTimeDisplay(item.booking_time)}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Trạng thái:</Text>
+                  <View style={styles.statusBadgeContainer}>
+                    <View style={[styles.statusBadge, getStatusStyles(statusKey).badge]}>
+                      <Text style={[styles.statusBadgeText, { color: getStatusStyles(statusKey).color }]}>
+                        {statusVi}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 
                 {(statusKey === "cancel_requested" || statusKey === "cancelled") && item.cancel_reason ? (
-                  <View style={{ marginTop: 8, padding: 8, backgroundColor: "#FEF2F2", borderRadius: 8 }}>
-                    <Text style={{ color: "#DC2626", fontWeight: "bold" }}>
+                  <View style={styles.cancelReasonContainer}>
+                    <Text style={styles.cancelReasonTitle}>
                       {statusKey === "cancel_requested" ? "🚨 Lý do khách yêu cầu hủy:" : "Lý do hủy:"}
                     </Text>
-                    <Text style={{ color: "#DC2626" }}>{item.cancel_reason}</Text>
+                    <Text style={styles.cancelReasonText}>{item.cancel_reason}</Text>
                   </View>
                 ) : null}
 
@@ -225,17 +255,47 @@ export default function BookingManagementScreen() {
                     <>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.confirmBtn]}
-                        onPress={() => updateStatus(item.id, "confirmed")}
+                        onPress={() => {
+                          Alert.alert(
+                            "Xác nhận lịch hẹn",
+                            "Bạn có chắc chắn muốn xác nhận lịch hẹn này?",
+                            [
+                              { text: "Hủy", style: "cancel" },
+                              { text: "Xác nhận", onPress: () => {
+                                  if (!item.staff_name) {
+                                    Alert.alert(
+                                      "Chưa phân công",
+                                      "Lịch hẹn chưa có nhân viên. Bạn sẽ được chuyển sang trang chi tiết để phân công.",
+                                      [
+                                        {
+                                          text: "Đồng ý",
+                                          onPress: () => {
+                                            router.push({
+                                              pathname: "/screens/admin/BookingDetail/BookingDetail",
+                                              params: { bookingId: String(item.id) },
+                                            });
+                                          }
+                                        }
+                                      ]
+                                    );
+                                  } else {
+                                    updateStatus(item.id, "confirmed");
+                                  }
+                                }
+                              }
+                            ]
+                          );
+                        }}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#2563EB" }]}>Xác nhận</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextBlue]}>Xác nhận</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.cancelBtn]}
                         onPress={() => openCancelModal(item.id, "cancelled")}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#DC2626" }]}>Từ chối</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextRed]}>Từ chối</Text>
                       </TouchableOpacity>
                     </>
                   )}
@@ -244,23 +304,32 @@ export default function BookingManagementScreen() {
                     <>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.completeBtn]}
-                        onPress={() => updateStatus(item.id, "completed")}
+                        onPress={() => {
+                          Alert.alert(
+                            "Xác nhận",
+                            "Bạn có chắc chắn muốn hoàn thành lịch hẹn này?",
+                            [
+                              { text: "Quay lại", style: "cancel" },
+                              { text: "Hoàn thành", onPress: () => updateStatus(item.id, "completed") }
+                            ]
+                          );
+                        }}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#16A34A" }]}>Hoàn thành</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextGreen]}>Hoàn thành</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.cancelBtn]}
                         onPress={() => openCancelModal(item.id, "cancelled")}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#DC2626" }]}>Hủy</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextRed]}>Hủy</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.actionButtonWrap}
                         onPress={() =>
                           router.push({
-                            pathname: "/screens/admin/tabs/BookingManagementScreen/BookingDetail",
+                            pathname: "/screens/admin/BookingDetail/BookingDetail",
                             params: { bookingId: String(item.id) },
                           })
                         }
@@ -274,17 +343,26 @@ export default function BookingManagementScreen() {
                     <>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.cancelBtn]}
-                        onPress={() => openCancelModal(item.id, "cancelled")}
+                        onPress={() => {
+                          Alert.alert(
+                            "Xác nhận duyệt hủy",
+                            "Bạn có chắc chắn muốn duyệt yêu cầu hủy lịch này?",
+                            [
+                              { text: "Quay lại", style: "cancel" },
+                              { text: "Duyệt hủy", style: "destructive", onPress: () => updateStatus(item.id, "cancelled") }
+                            ]
+                          );
+                        }}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#DC2626" }]}>Duyệt hủy</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextRed]}>Duyệt hủy</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.actionButtonWrap, styles.confirmBtn]}
-                        onPress={() => updateStatus(item.id, "confirmed")}
+                        onPress={() => openCancelModal(item.id, "confirmed")}
                         disabled={isUpdating}
                       >
-                        <Text style={[styles.actionButtonText, { color: "#2563EB" }]}>Từ chối</Text>
+                        <Text style={[styles.actionButtonText, styles.actionTextBlue]}>Từ chối</Text>
                       </TouchableOpacity>
                     </>
                   )}
@@ -294,7 +372,7 @@ export default function BookingManagementScreen() {
                       style={styles.actionButtonWrap}
                       onPress={() =>
                         router.push({
-                          pathname: "/screens/admin/tabs/BookingManagementScreen/BookingDetail",
+                          pathname: "/screens/admin/BookingDetail/BookingDetail",
                           params: { bookingId: String(item.id) },
                         })
                       }
@@ -306,7 +384,8 @@ export default function BookingManagementScreen() {
               </View>
             );
           })}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <Modal
         visible={isCancelModalVisible}
@@ -314,27 +393,27 @@ export default function BookingManagementScreen() {
         animationType="fade"
         onRequestClose={() => setCancelModalVisible(false)}
       >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
-          <View style={{ width: "85%", backgroundColor: "#FFF", borderRadius: 12, padding: 20, elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
               <Ionicons name="alert-circle" size={24} color="#DC2626" />
-              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#1F2937", marginLeft: 8 }}>
-                Lý do từ chối / hủy lịch
+              <Text style={styles.modalTitle}>
+                {pendingCancelStatus === "confirmed" ? "Lý do từ chối hủy lịch" : "Lý do từ chối / hủy lịch"}
               </Text>
             </View>
             
             <TextInput
-              style={{ padding: 12, borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, fontSize: 14, color: "#1F2937", backgroundColor: "#F9FAFB", minHeight: 80, textAlignVertical: "top" }}
-              placeholder="Nhập lý do hủy tại đây..."
+              style={styles.modalInput}
+              placeholder={pendingCancelStatus === "confirmed" ? "Nhập lý do từ chối hủy tại đây..." : "Nhập lý do hủy tại đây..."}
               multiline
               numberOfLines={4}
               value={cancelReason}
               onChangeText={setCancelReason}
             />
 
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 12 }}>
+            <View style={styles.modalButtons}>
               <TouchableOpacity 
-                style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: "#E5E7EB" }}
+                style={[styles.modalButton, styles.modalButtonCancel]}
                 onPress={() => {
                   setCancelModalVisible(false);
                   setCancelReason("");
@@ -342,11 +421,11 @@ export default function BookingManagementScreen() {
                   setPendingCancelStatus(null);
                 }}
               >
-                <Text style={{ color: "#4B5563", fontWeight: "600" }}>Quay lại</Text>
+                <Text style={styles.modalButtonCancelText}>Quay lại</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: "#DC2626" }}
+                style={[styles.modalButton, styles.modalButtonConfirm]}
                 onPress={() => {
                   if (!cancelReason.trim()) {
                     Alert.alert("Thông báo", "Vui lòng nhập lý do hủy.");
@@ -362,7 +441,7 @@ export default function BookingManagementScreen() {
                 }}
                 disabled={isUpdating}
               >
-                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
+                <Text style={styles.modalButtonConfirmText}>
                   {isUpdating ? "Đang xử lý..." : "Xác nhận hủy"}
                 </Text>
               </TouchableOpacity>

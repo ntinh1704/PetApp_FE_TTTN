@@ -29,6 +29,11 @@ export default StyleSheet.create({
     padding: 12,
     paddingBottom: 40,
   },
+  containerNoPadTop: {
+    padding: 12,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
   header: {
     backgroundColor: "#5CB15A",
     flexDirection: "row",
@@ -43,6 +48,8 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    marginHorizontal: 12,
+    marginTop: 12,
   },
   headerLeft: {
     flexDirection: "row",
@@ -80,10 +87,25 @@ export default StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
   },
+  loadingContainer: {
+    alignItems: "center",
+    marginTop: 40,
+    gap: 10,
+  },
+  loadingText: {
+    color: "#6B7280",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   statGrid: {
     gap: 12,
   },
+  statRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
   statCard: {
+    flex: 1,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
@@ -123,6 +145,121 @@ export default StyleSheet.create({
     fontWeight: "600",
     color: "#111827",
     marginBottom: 12,
+  },
+  scheduleSectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 12,
+  },
+  scheduleDaysScroll: {
+    marginBottom: 16,
+  },
+  scheduleDayBtn: {
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+  },
+  scheduleDayBtnActive: {
+    backgroundColor: "#5CB15A",
+  },
+  scheduleDayName: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  scheduleDayNameActive: {
+    color: "#FFF",
+  },
+  scheduleDayNum: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  scheduleDayNumActive: {
+    color: "#FFF",
+  },
+  scheduleCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  scheduleRow: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    alignItems: "center",
+  },
+  scheduleTimeCol: {
+    width: 60,
+    alignItems: "center",
+  },
+  scheduleTimeText: {
+    fontWeight: "bold",
+    color: "#111827",
+    fontSize: 15,
+  },
+  scheduleBar: {
+    width: 3,
+    height: "100%",
+    borderRadius: 2,
+    marginHorizontal: 10,
+  },
+  scheduleBarCompleted: {
+    backgroundColor: "#16A34A",
+  },
+  scheduleBarPending: {
+    backgroundColor: "#F59E0B",
+  },
+  scheduleInfoCol: {
+    flex: 1,
+  },
+  schedulePetName: {
+    fontWeight: "bold",
+    color: "#111827",
+    fontSize: 15,
+  },
+  scheduleServiceName: {
+    color: "#4B5563",
+    fontSize: 13,
+    marginTop: 2,
+  },
+  scheduleStaffRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  scheduleStaffIcon: {
+    marginRight: 4,
+  },
+  scheduleStaffText: {
+    color: "#6B7280",
+    fontSize: 12,
+  },
+  scheduleDetailBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#E0E7FF",
+    borderRadius: 6,
+  },
+  scheduleDetailBtnText: {
+    color: "#4338CA",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  scheduleEmptyContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  scheduleEmptyText: {
+    color: "#9CA3AF",
+    marginTop: 10,
   },
   chartPlaceholder: {
     alignItems: "center",

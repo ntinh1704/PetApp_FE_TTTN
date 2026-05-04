@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5E7EB",
     paddingHorizontal: 14,
     marginBottom: 16,
+    color: "#000000",
   },
 
   sendBtn: {

@@ -77,8 +77,20 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen name="HomeScreen" options={{ href: null }} />
+        <Tabs.Screen name="PetsScreen" options={{ href: null }} />
+        <Tabs.Screen name="ServiceScreen" options={{ href: null }} />
+        <Tabs.Screen name="HistoryScreen" options={{ href: null }} />
+        <Tabs.Screen name="ProfileScreen" options={{ href: null }} />
+
+        {/* Ẩn các file styles.ts khỏi tab bar */}
+        <Tabs.Screen name="HomeScreen/styles" options={{ href: null }} />
+        <Tabs.Screen name="PetsScreen/styles" options={{ href: null }} />
+        <Tabs.Screen name="ServiceScreen/styles" options={{ href: null }} />
+        <Tabs.Screen name="HistoryScreen/styles" options={{ href: null }} />
+        <Tabs.Screen name="ProfileScreen/styles" options={{ href: null }} />
       </Tabs>
-      {/* <ChatBubble /> */}
+      <ChatBubble />
     </View>
   );
 }

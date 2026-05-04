@@ -34,3 +34,31 @@ export async function deleteBookingApi(id: number) {
   const res = await api.delete<Booking>("/bookings/", { data: { id } });
   return res.data;
 }
+
+export async function addServiceToBookingApi(
+  bookingId: number,
+  serviceId: number,
+  quantity: number = 1
+) {
+  const res = await api.post<Booking>("/bookings/add-service", {
+    booking_id: bookingId,
+    service_id: serviceId,
+    quantity,
+  });
+  return res.data;
+}
+
+export async function getStaffAvailabilityApi(
+  date: string,
+  time: string,
+  endTime: string
+) {
+  const res = await api.get("/bookings/staff-availability", {
+    params: {
+      booking_date: date,
+      booking_time: time,
+      booking_end_time: endTime,
+    },
+  });
+  return res.data;
+}

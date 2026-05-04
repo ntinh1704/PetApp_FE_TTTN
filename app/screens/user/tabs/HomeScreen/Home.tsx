@@ -149,7 +149,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24, minHeight: "100%" }} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Thú cưng của tôi</Text>
+            <Text style={styles.sectionTitle}>🐾 Thú cưng của tôi</Text>
             <TouchableOpacity onPress={() => router.push("/screens/user/tabs/PetsScreen/Pets")}>
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
@@ -188,7 +188,7 @@ export default function HomeScreen() {
 
         <View style={styles.card}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Dịch vụ</Text>
+            <Text style={styles.sectionTitle}>📋 Dịch vụ</Text>
             <TouchableOpacity onPress={() => router.push("/screens/user/tabs/ServiceScreen/Service")}>
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>

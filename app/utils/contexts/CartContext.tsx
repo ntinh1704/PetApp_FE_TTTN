@@ -57,6 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.service.id === service.id);
       if (existing) {
+        if (!service.is_quantifiable) return prev;
         return prev.map((i) =>
           i.service.id === service.id ? { ...i, quantity: i.quantity + 1 } : i
         );

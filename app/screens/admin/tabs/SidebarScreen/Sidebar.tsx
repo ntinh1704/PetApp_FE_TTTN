@@ -104,6 +104,18 @@ export default function SidebarScreen(props: DrawerContentComponentProps) {
             inactiveTintColor="#111827"
           />
           <DrawerItem
+            label="Quản lý nhân viên"
+            labelStyle={styles.menuText}
+            onPress={() =>
+              navigation.navigate("StaffManagementScreen/StaffManagement")
+            }
+            icon={({ size, color }: { size: number; color: string }) => (
+              <Ionicons name="id-card" size={size} color={color} />
+            )}
+            style={styles.menuItem}
+            inactiveTintColor="#111827"
+          />
+          <DrawerItem
             label="Quản lý người dùng"
             labelStyle={styles.menuText}
             onPress={() =>

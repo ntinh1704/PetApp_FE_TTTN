@@ -21,10 +21,10 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
   content: {
-    backgroundColor: "#F5F7F9",
+    backgroundColor: "#F3F4F6",
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
 
   /* ─── Section Card ─── */
@@ -298,7 +298,18 @@ export const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
 
-  /* ─── Submit button ─── */
+  /* ─── Bottom Bar & Submit button ─── */
+  bottomBar: {
+    padding: 16,
+    backgroundColor: "#FFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 8,
+  },
   submitBtn: {
     backgroundColor: GREEN,
     borderRadius: 14,
@@ -307,8 +318,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
-    marginTop: 6,
-    marginBottom: 20,
     shadowColor: GREEN,
     shadowOpacity: 0.3,
     shadowRadius: 8,

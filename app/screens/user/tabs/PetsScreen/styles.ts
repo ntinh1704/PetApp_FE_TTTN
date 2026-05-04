@@ -5,6 +5,7 @@ const GREEN = "#5CB15A";
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    backgroundColor: GREEN,
   },
 
   /* HEADER */
@@ -77,7 +78,7 @@ export const styles = StyleSheet.create({
   },
 
   viewBtn: {
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#5CB15A",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -86,7 +87,7 @@ export const styles = StyleSheet.create({
 
   viewText: {
     fontWeight: "800",
-    color: "#2E7D32",
+    color: "#FFFFFF",
     fontSize: 13,
   },
 
@@ -144,7 +145,7 @@ export const styles = StyleSheet.create({
   },
 
   imagePicker: {
-    height: 300,
+    height: 200,
     borderRadius: 14,
     backgroundColor: "#E0E0E0",
     alignItems: "center",

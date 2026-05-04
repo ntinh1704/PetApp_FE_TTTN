@@ -11,6 +11,11 @@ export const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 40,
   },
+  containerNoPadTop: {
+    padding: 12,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
   header: {
     height: 64,
     backgroundColor: GREEN,
@@ -21,11 +26,16 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     marginBottom: 0,
+    marginHorizontal: 12,
+    marginTop: 12,
   },
   headerTitle: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "900",
+  },
+  headerSpacer: {
+    width: 40,
   },
   content: {
     backgroundColor: "#F3F4F6",
@@ -50,6 +60,12 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
+  cardMt12: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    overflow: "hidden",
+    marginTop: 12,
+  },
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -60,6 +76,9 @@ export const styles = StyleSheet.create({
   },
   rowUnread: {
     backgroundColor: "#E6F4EA",
+  },
+  rowUnreadCancel: {
+    backgroundColor: "#FEF2F2",
   },
   thumbnailContainer: {
     width: 50,
@@ -120,5 +139,11 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
     fontSize: 14,
     marginTop: 24,
+  },
+  thumbnailCancel: {
+    backgroundColor: "#FEE2E2",
+  },
+  titleTextCancel: {
+    color: "#B91C1C",
   },
 });

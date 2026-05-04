@@ -5,7 +5,6 @@ import { DrawerActions, useNavigation } from "@react-navigation/native";
 import React, { useMemo, useState } from "react";
 import {
   Alert,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -78,18 +77,18 @@ export default function UserManagementScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={[styles.header, { marginHorizontal: 12, marginTop: 12 }]}>
+      <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Pressable
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
             <Ionicons name="menu" size={20} color="#FFF" />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Quản lý người dùng</Text>
         </View>
       </View>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: 0 }]}>
+      <ScrollView contentContainerStyle={styles.containerNoPadTop}>
 
         <TextInput
           placeholder="Tìm người dùng..."
@@ -111,25 +110,36 @@ export default function UserManagementScreen() {
           userList.map((u) => (
             <View key={u.id} style={styles.userCard}>
               <View style={styles.userHeader}>
-                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                <View style={styles.userNameRow}>
                   <Ionicons name="person" size={18} color="#111827" />
                   <Text style={styles.userName}>{u.name || (u.email ? u.email.split("@")[0] : "Người dùng")}</Text>
                 </View>
                 <View style={[
-                  { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
-                  u.is_active !== false ? { backgroundColor: "#D1FAE5" } : { backgroundColor: "#FEE2E2" }
+                  styles.statusBadge,
+                  u.is_active !== false ? styles.statusBadgeActive : styles.statusBadgeInactive
                 ]}>
                   <Text style={[
-                    { fontSize: 11, fontWeight: "600" },
-                    u.is_active !== false ? { color: "#065F46" } : { color: "#991B1B" }
+                    styles.statusBadgeText,
+                    u.is_active !== false ? styles.statusTextActive : styles.statusTextInactive
                   ]}>
                     {u.is_active !== false ? "Đang hoạt động" : "Đã bị khóa"}
                   </Text>
                 </View>
               </View>
-              <Text style={styles.userInfo}>Email: {u.email}</Text>
-              <Text style={styles.userInfo}>Phone: {u.phone || "Chưa có"}</Text>
-              <Text style={styles.userInfo}>Role: {u.role || "user"}</Text>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Email:</Text>
+                <Text style={styles.infoValue}>{u.email}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Số điện thoại:</Text>
+                <Text style={styles.infoValue}>{u.phone || "Chưa có"}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Vai trò:</Text>
+                <Text style={styles.infoValue}>{u.role || "user"}</Text>
+              </View>
 
               <View style={styles.actionRow}>
                 <View style={styles.roleToggleContainer}>
@@ -150,12 +160,12 @@ export default function UserManagementScreen() {
                 </View>
 
                 <TouchableOpacity
-                  style={[styles.deleteBtn, isUpdating && { opacity: 0.5 }, u.is_active === false && { backgroundColor: "#5CB15A" }]}
+                  style={[styles.deleteBtn, isUpdating && styles.disabledOpacity, u.is_active === false && styles.deleteBtnRestore]}
                   onPress={() => onToggleActive(u)}
                   disabled={isUpdating}
                 >
                   <Ionicons name={u.is_active !== false ? "lock-closed-outline" : "lock-open-outline"} size={16} color={u.is_active !== false ? "#DC2626" : "#FFFFFF"} />
-                  <Text style={[styles.deleteBtnText, { color: u.is_active !== false ? "#DC2626" : "#FFFFFF", marginLeft: 4 }]}>
+                  <Text style={[styles.deleteBtnText, u.is_active === false && styles.deleteBtnTextRestore]}>
                     {u.is_active !== false ? "Khóa tài khoản" : "Kích hoạt"}
                   </Text>
                 </TouchableOpacity>

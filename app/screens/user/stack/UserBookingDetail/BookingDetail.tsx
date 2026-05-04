@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -42,11 +42,16 @@ const formatTimeDisplay = (value?: string | null) => {
 const mapStatusToText = (status: string) => {
   const map: Record<string, string> = {
     pending: "Đang xác nhận",
+    "đang xác nhận": "Đang xác nhận",
     confirmed: "Đã xác nhận",
+    "đã xác nhận": "Đã xác nhận",
     completed: "Hoàn thành",
+    "hoàn thành": "Hoàn thành",
     cancelled: "Đã hủy",
     canceled: "Đã hủy",
+    "đã hủy": "Đã hủy",
     cancel_requested: "Đang xin hủy",
+    "đang xin hủy": "Đang xin hủy",
     "chờ thanh toán": "Đang xác nhận",
     "đã thanh toán": "Đã xác nhận",
   };
@@ -58,7 +63,14 @@ export default function BookingDetailUserScreen() {
   const { bookingId } = useLocalSearchParams();
   const idValue = Number(bookingId);
 
-  const { data: bookingRaw, isLoading } = useBookingById(idValue);
+  const { data: bookingRaw, isLoading, refetch } = useBookingById(idValue);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
   const updateMutation = useUpdateBooking();
   const queryClient = useQueryClient();
 
@@ -180,14 +192,40 @@ export default function BookingDetailUserScreen() {
           <Text style={styles.sectionTitle}>Thông tin dịch vụ</Text>
           
           <View style={styles.row}>
-            <Text style={styles.label}>Dịch vụ:</Text>
-            <Text style={styles.value}>{booking.service_names?.join(", ") || booking.service_name}</Text>
+            <Text style={styles.label}>Nhân viên phụ trách:</Text>
+            <Text style={[styles.value, { fontWeight: "bold", color: "#111827" }]}>{booking.staff_name || "Đang xếp nhân viên"}</Text>
           </View>
 
           <View style={styles.row}>
             <Text style={styles.label}>Thú cưng:</Text>
             <Text style={styles.value}>{booking.pet_name}</Text>
           </View>
+
+          <View style={{height: 1, backgroundColor: "#E5E7EB", marginVertical: 12}} />
+
+          <Text style={[styles.sectionTitle, { fontSize: 14, marginBottom: 8 }]}>Chi tiết dịch vụ:</Text>
+          {booking.services_detail?.length > 0 ? (
+            booking.services_detail.map((svc: any, idx: number) => {
+              const isAddon = svc.is_addon;
+              return (
+                <View key={idx} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 6, borderBottomWidth: 1, borderColor: "#F3F4F6" }}>
+                  <View style={{ flex: 1, paddingRight: 8 }}>
+                    <Text style={{ color: "#374151" }}>{svc.service_name} (x{svc.quantity})</Text>
+                    {isAddon && (
+                      <View style={{backgroundColor: "#FEF3C7", alignSelf: "flex-start", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginTop: 4}}>
+                         <Text style={{ color: "#D97706", fontSize: 10, fontWeight: "bold" }}>Dịch vụ phát sinh</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={{ color: "#111827", fontWeight: "600" }}>{svc.subtotal?.toLocaleString("vi-VN")} đ</Text>
+                </View>
+              )
+            })
+          ) : (
+            <Text style={{ color: "#6B7280" }}>{booking.service_names?.join(", ") || booking.service_name}</Text>
+          )}
+
+          <View style={{height: 1, backgroundColor: "#E5E7EB", marginVertical: 12}} />
 
           <View style={styles.row}>
             <Text style={styles.label}>Thời gian:</Text>
@@ -234,7 +272,9 @@ export default function BookingDetailUserScreen() {
 
         {booking.cancel_reason ? (
           <View style={[styles.card, { borderColor: "#FCA5A5", borderWidth: 1, backgroundColor: "#FEF2F2" }]}>
-            <Text style={[styles.sectionTitle, { color: "#DC2626" }]}>Lý do hủy</Text>
+            <Text style={[styles.sectionTitle, { color: "#DC2626" }]}>
+              {isConfirmed ? "Lý do từ chối hủy" : "Lý do hủy"}
+            </Text>
             <Text style={{ fontSize: 14, color: "#DC2626", marginTop: 4 }}>{booking.cancel_reason}</Text>
           </View>
         ) : null}

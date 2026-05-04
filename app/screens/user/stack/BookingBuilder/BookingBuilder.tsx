@@ -16,10 +16,9 @@ import {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
-
 import { useCart } from "../../../../utils/contexts/CartContext";
 import { usePets } from "../../../../utils/hook/usePets";
-import { useCreateBooking } from "../../../../utils/hook/useBooking";
+import { useCreateBooking, useStaffAvailability } from "../../../../utils/hook/useBooking";
 import { getBookingsByDateApi } from "../../../../services/authBooking";
 import { getImageUrl } from "../../../../services/api";
 import { BookingCreate } from "../../../../utils/models/booking";
@@ -109,6 +108,8 @@ export default function BookingBuilderScreen() {
   /* ─── state ─── */
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
   const [showPetOptions, setShowPetOptions] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
+  const [showStaffOptions, setShowStaffOptions] = useState(false);
   const [bookingDate, setBookingDate] = useState<Date>(new Date());
   const [bookingTime, setBookingTime] = useState<Date>(new Date());
   const [notes, setNotes] = useState("");
@@ -118,6 +119,25 @@ export default function BookingBuilderScreen() {
   /* ─── slot check ─── */
   const [existingBookings, setExistingBookings] = useState<any[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+
+  /* ─── staff availability (depends on date/time) ─── */
+  const dateStrForStaff = useMemo(() => formatDateApi(bookingDate), [bookingDate]);
+  const startTimeStrForStaff = useMemo(() => formatTime(bookingTime), [bookingTime]);
+  const endTimeStrForStaff = useMemo(
+    () => addMinutesToTime(startTimeStrForStaff, bookingTotalDuration > 0 ? bookingTotalDuration : 30),
+    [startTimeStrForStaff, bookingTotalDuration],
+  );
+  const { data: staffAvailData, isLoading: loadingStaff } = useStaffAvailability(
+    dateStrForStaff, startTimeStrForStaff, endTimeStrForStaff,
+  );
+
+  const staffOptions = useMemo(
+    () =>
+      Array.isArray(staffAvailData)
+        ? staffAvailData
+        : ((staffAvailData as any)?.data ?? []),
+    [staffAvailData],
+  );
 
   // Auto-select first pet
   useEffect(() => {
@@ -151,14 +171,21 @@ export default function BookingBuilderScreen() {
 
   /* ─── derived ─── */
   const selectedPet = petOptions.find((p: any) => p.id === selectedPetId);
+  const selectedStaff = staffOptions.find((s: any) => s.id === selectedStaffId);
 
   const startTimeStr = formatTime(bookingTime);
   const effectiveDuration = bookingTotalDuration > 0 ? bookingTotalDuration : 30;
 
-  const endTimeStr = useMemo(
-    () => addMinutesToTime(startTimeStr, effectiveDuration),
-    [startTimeStr, effectiveDuration],
-  );
+  const endDateTime = useMemo(() => {
+    const [hh, mm] = startTimeStr.split(":").map(Number);
+    const dt = new Date(bookingDate);
+    dt.setHours(hh);
+    dt.setMinutes(mm + effectiveDuration);
+    return dt;
+  }, [bookingDate, startTimeStr, effectiveDuration]);
+
+  const endTimeStr = formatTime(endDateTime);
+  const endDateStr = formatDateDisplay(endDateTime);
 
   // Check slot overlap
   const slotConflict = useMemo(() => {
@@ -167,30 +194,55 @@ export default function BookingBuilderScreen() {
     const newStart = timeToMinutes(startTimeStr);
     const newEnd = timeToMinutes(endTimeStr);
 
-    for (const b of existingBookings) {
-      // Skip cancelled bookings
-      const st = (b.status || "").toLowerCase();
-      if (st === "cancelled" || st === "đã hủy") continue;
+    if (selectedStaffId) {
+      const staff = staffOptions.find((s: any) => s.id === selectedStaffId);
+      if (staff && staff.status === "busy") {
+        const fromDateStr = formatDateDisplay(bookingDate);
+        let toDateStr = fromDateStr;
+        const fromMins = timeToMinutes(staff.busy_from);
+        const toMins = timeToMinutes(staff.busy_to);
+        if (toMins <= fromMins) {
+          const nextDay = new Date(bookingDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          toDateStr = formatDateDisplay(nextDay);
+        }
+        return {
+          type: "staff_busy",
+          conflictStart: staff.busy_from,
+          conflictEnd: staff.busy_to,
+          message: `Nhân viên ${staff.name} đã có lịch từ ${staff.busy_from} ${fromDateStr} - ${staff.busy_to} ${toDateStr}`,
+        };
+      }
+    }
 
-      if (!b.booking_time) continue;
+    // 2. Check shop capacity
+    const overlappingBookings = existingBookings.filter((b) => {
+      const st = (b.status || "").toLowerCase();
+      if (st === "cancelled" || st === "đã hủy") return false;
+      if (!b.booking_time) return false;
+
       const bStart = timeToMinutes(b.booking_time.substring(0, 5));
-      let bEnd = bStart + 30; // default 30 min if no end_time
+      let bEnd = bStart + 30;
       if (b.booking_end_time) {
         bEnd = timeToMinutes(b.booking_end_time.substring(0, 5));
       }
 
-      // Overlap check: existingStart < newEnd && existingEnd > newStart
-      if (bStart < newEnd && bEnd > newStart) {
-        return {
-          conflictStart: b.booking_time.substring(0, 5),
-          conflictEnd: b.booking_end_time
-            ? b.booking_end_time.substring(0, 5)
-            : addMinutesToTime(b.booking_time.substring(0, 5), 30),
-        };
-      }
+      return bStart < newEnd && bEnd > newStart;
+    });
+
+    const totalStaffCount = staffOptions.length;
+
+    if (totalStaffCount > 0 && overlappingBookings.length >= totalStaffCount) {
+      return {
+        type: "shop_full",
+        conflictStart: startTimeStr,
+        conflictEnd: endTimeStr,
+        message: "Cửa hàng đã kín lịch trong khung giờ này",
+      };
     }
+
     return null;
-  }, [existingBookings, startTimeStr, endTimeStr, bookingItems.length]);
+  }, [existingBookings, startTimeStr, endTimeStr, bookingItems.length, selectedStaffId, staffOptions]);
 
   /* ─── pickers ─── */
   const openDatePicker = () => {
@@ -254,8 +306,8 @@ export default function BookingBuilderScreen() {
     }
     if (slotConflict) {
       Alert.alert(
-        "Trùng lịch",
-        `Khung giờ ${startTimeStr} - ${endTimeStr} bị trùng với lịch hẹn ${slotConflict.conflictStart} - ${slotConflict.conflictEnd}. Vui lòng chọn giờ khác.`,
+        slotConflict.type === "staff_busy" ? "Nhân viên bận" : "Kín lịch",
+        `${slotConflict.message}. Vui lòng chọn ${slotConflict.type === "staff_busy" ? "nhân viên hoặc " : ""}giờ khác.`,
       );
       return;
     }
@@ -286,6 +338,7 @@ export default function BookingBuilderScreen() {
 
     const payload: BookingCreate = {
       pet_id: selectedPetId,
+      staff_id: selectedStaffId,
       service_ids: serviceIds,
       booking_date: formatDateApi(bookingDate),
       booking_time: startTimeStr,
@@ -407,6 +460,9 @@ export default function BookingBuilderScreen() {
         {/* ─── 2. Services from Cart ─── */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>📋 Dịch vụ đã chọn</Text>
+          <Text style={{ fontSize: 13, color: "#EF4444", marginBottom: 12, fontStyle: "italic" }}>
+            *Cửa hàng có thể cập nhật thêm dịch vụ phát sinh nếu cần
+          </Text>
 
           {bookingItems.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có dịch vụ nào trong giỏ hàng</Text>
@@ -439,12 +495,6 @@ export default function BookingBuilderScreen() {
                     </Text>
                   </View>
                   <Text style={styles.serviceQty}>x{item.quantity}</Text>
-                  <TouchableOpacity
-                    style={styles.removeBtn}
-                    onPress={() => removeItem(item.service.id)}
-                  >
-                    <Ionicons name="close-circle" size={20} color="#EF4444" />
-                  </TouchableOpacity>
                 </View>
               ))}
 
@@ -461,7 +511,162 @@ export default function BookingBuilderScreen() {
           )}
         </View>
 
-        {/* ─── 3. Date & Time ─── */}
+        {/* ─── 3. Staff Selector ─── */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>👨‍💼 Chọn nhân viên</Text>
+
+          <TouchableOpacity
+            style={[styles.selectBox, showStaffOptions && styles.selectBoxOpen]}
+            activeOpacity={0.8}
+            onPress={() => staffOptions.length && setShowStaffOptions((p) => !p)}
+          >
+            <View style={styles.selectBoxLeft}>
+              {selectedStaff ? (
+                selectedStaff.avatar ? (
+                  <Image source={{ uri: getImageUrl(selectedStaff.avatar) }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+                ) : (
+                  <Ionicons name="person-circle" size={40} color="#111827" />
+                )
+              ) : (
+                <View style={[styles.petAvatarSmall, { alignItems: "center", justifyContent: "center" }]}>
+                  <Ionicons name="storefront" size={24} color="#6B7280" />
+                </View>
+              )}
+              <View>
+                <Text style={styles.selectText}>
+                  {selectedStaff ? selectedStaff.name : "Để cửa hàng sắp xếp"}
+                </Text>
+                {selectedStaff?.specialty && (
+                  <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                    Chuyên môn: {selectedStaff.specialty}
+                  </Text>
+                )}
+                {selectedStaff?.status === "busy" && (
+                  <Text style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>
+                    ⚠️ Trùng giờ: {selectedStaff.busy_from} - {selectedStaff.busy_to}
+                  </Text>
+                )}
+                {selectedStaff?.busy_slots?.length > 0 && (
+                  <Text style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+                    📋 Lịch trong ngày: {selectedStaff.busy_slots.map((s: any) => `${s.from}-${s.to}`).join(", ")}
+                  </Text>
+                )}
+              </View>
+            </View>
+            <Ionicons
+              name={showStaffOptions ? "chevron-up" : "chevron-down"}
+              size={18}
+              color="#5A5A5A"
+            />
+          </TouchableOpacity>
+
+          {staffOptions.length === 0 && (
+            <Text style={styles.emptyText}>Hiện chưa có nhân viên nào</Text>
+          )}
+
+          {showStaffOptions && staffOptions.length > 0 && (
+            <View style={styles.optionsBox}>
+              <TouchableOpacity
+                style={styles.optionItem}
+                onPress={() => {
+                  setSelectedStaffId(null);
+                  setShowStaffOptions(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.petAvatarSmall, { alignItems: "center", justifyContent: "center" }]}>
+                  <Ionicons name="storefront" size={24} color="#6B7280" />
+                </View>
+                <Text style={styles.optionText}>Để cửa hàng sắp xếp</Text>
+              </TouchableOpacity>
+
+              {staffOptions.map((staff: any) => {
+                const isBusy = staff.status === "busy";
+                const hasBusySlots = staff.busy_slots?.length > 0;
+                return (
+                <TouchableOpacity
+                  key={staff.id}
+                  style={[styles.optionItem, isBusy && { opacity: 0.7, backgroundColor: "#FEF2F2" }]}
+                  onPress={() => {
+                    if (isBusy) {
+                      Alert.alert(
+                        "Nhân viên đang bận",
+                        `${staff.name} đã có lịch từ ${staff.busy_from} - ${staff.busy_to}. Bạn vẫn muốn chọn?`,
+                        [
+                          { text: "Hủy", style: "cancel" },
+                          { text: "Vẫn chọn", onPress: () => { setSelectedStaffId(staff.id); setShowStaffOptions(false); } },
+                        ]
+                      );
+                    } else {
+                      setSelectedStaffId(staff.id);
+                      setShowStaffOptions(false);
+                    }
+                  }}
+                  activeOpacity={0.7}
+                >
+                  {staff.avatar ? (
+                    <Image
+                      source={{ uri: getImageUrl(staff.avatar) }}
+                      style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: isBusy ? "#DC2626" : "#E5E7EB" }}
+                    />
+                  ) : (
+                    <Ionicons name="person-circle" size={40} color={isBusy ? "#DC2626" : "#111827"} />
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                      <Text style={[styles.optionText, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{staff.name}</Text>
+                      <View style={{ backgroundColor: isBusy ? "#FEE2E2" : "#DCFCE7", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                        <Text style={{ fontSize: 10, fontWeight: "bold", color: isBusy ? "#DC2626" : "#16A34A" }}>
+                          {isBusy ? "Bận" : "Rảnh"}
+                        </Text>
+                      </View>
+                    </View>
+                    {staff.specialty && (
+                      <Text style={{ fontSize: 12, color: "#6B7280" }}>
+                        Chuyên môn: {staff.specialty}
+                      </Text>
+                    )}
+                    {isBusy && (() => {
+                      const fromDateStr = formatDateDisplay(bookingDate);
+                      let toDateStr = fromDateStr;
+                      const fromMins = timeToMinutes(staff.busy_from);
+                      const toMins = timeToMinutes(staff.busy_to);
+                      if (toMins <= fromMins) {
+                        const nextDay = new Date(bookingDate);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        toDateStr = formatDateDisplay(nextDay);
+                      }
+                      return (
+                        <Text style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>
+                          ⚠️ Trùng giờ: {staff.busy_from} {fromDateStr} - {staff.busy_to} {toDateStr}
+                        </Text>
+                      );
+                    })()}
+                    {hasBusySlots && (
+                      <Text style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+                        📋 Lịch trong ngày: {staff.busy_slots.map((s: any) => {
+                          const fromDateStr = formatDateDisplay(bookingDate);
+                          let toDateStr = fromDateStr;
+                          const fromMins = timeToMinutes(s.from);
+                          const toMins = timeToMinutes(s.to);
+                          if (toMins <= fromMins) {
+                            const nextDay = new Date(bookingDate);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            toDateStr = formatDateDisplay(nextDay);
+                          }
+                          return `${s.from} ${fromDateStr} - ${s.to} ${toDateStr}`;
+                        }).join(", ")}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </View>
+
+        {/* ─── 4. Date & Time ─── */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>📅 Chọn ngày & giờ</Text>
           <Text style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
@@ -517,8 +722,8 @@ export default function BookingBuilderScreen() {
                     ]}
                   >
                     {slotConflict
-                      ? `Trùng lịch: ${slotConflict.conflictStart} - ${slotConflict.conflictEnd}`
-                      : `Khung giờ: ${startTimeStr} - ${endTimeStr}`}
+                      ? slotConflict.message
+                      : `Dự kiến hoàn thành: ${endTimeStr} ${endDateStr}`}
                   </Text>
                 </>
               )}
@@ -526,7 +731,7 @@ export default function BookingBuilderScreen() {
           )}
         </View>
 
-        {/* ─── 4. Payment Method ─── */}
+        {/* ─── 5. Payment Method ─── */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>💳 Phương thức thanh toán</Text>
 
@@ -583,13 +788,13 @@ export default function BookingBuilderScreen() {
               style={styles.paymentIcon}
             />
             <View>
-              <Text style={styles.paymentLabel}>Quét QR (SePay)</Text>
+              <Text style={styles.paymentLabel}>Quét QR</Text>
               <Text style={styles.paymentDesc}>Chuyển khoản qua mã QR</Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* ─── 5. Notes ─── */}
+        {/* ─── 6. Notes ─── */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>📝 Ghi chú</Text>
           <TextInput
@@ -601,8 +806,10 @@ export default function BookingBuilderScreen() {
             multiline
           />
         </View>
+      </ScrollView>
 
-        {/* ─── Submit ─── */}
+      {/* ─── Bottom Bar ─── */}
+      <View style={styles.bottomBar}>
         <TouchableOpacity
           style={[
             styles.submitBtn,
@@ -621,7 +828,7 @@ export default function BookingBuilderScreen() {
             {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt lịch"}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

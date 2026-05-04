@@ -5,7 +5,7 @@ type PetsContextType = {
   pets: Pet[];
   addPet: (pet: Pet) => void;
   updatePet: (pet: Pet) => void;
-  removePet: (id: string) => void;
+  removePet: (id: number) => void;
 };
 
 const PetsContext = createContext<PetsContextType | null>(null);
@@ -13,14 +13,15 @@ const PetsContext = createContext<PetsContextType | null>(null);
 export const PetsProvider = ({ children }: { children: React.ReactNode }) => {
   const [pets, setPets] = useState<Pet[]>([
     {
-      id: "1",
+      id: 1,
+      user_id: 1,
       name: "Bella",
       breed: "",
       gender: "",
-      age: "",
+      age: null,
       color: "",
-      height: "",
-      weight: "",
+      height: null,
+      weight: null,
       image: null,
     },
   ]);
@@ -35,7 +36,7 @@ export const PetsProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  const removePet = (id: int) => {
+  const removePet = (id: number) => {
     setPets((prev) => prev.filter((p) => p.id !== id));
   };
 

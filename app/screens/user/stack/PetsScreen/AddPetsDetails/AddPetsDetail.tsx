@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { api, getImageUrl } from "@/app/services/api";
 import { uploadPetImageApi } from "@/app/services/authPet";
@@ -26,6 +26,7 @@ export default function AddPetDetail() {
   const { pet } = useLocalSearchParams();
   const parsedPet = JSON.parse(pet as string) as Pet;
   const { mutateAsync: updatePet, isPending } = useUpdatePet();
+  const insets = useSafeAreaInsets();
 
   const [form, setForm] = useState(parsedPet);
 
@@ -118,7 +119,7 @@ export default function AddPetDetail() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
       {/* ===== HEADER ===== */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -131,7 +132,7 @@ export default function AddPetDetail() {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={{ flex: 1}}
       >
         <ScrollView contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -227,18 +228,22 @@ export default function AddPetDetail() {
               }
             />
           </View>
-
-          {/* BUTTON */}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={savePet}
-            disabled={isPending}
-          >
-            <Text style={styles.buttonText}>
-              {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
+
+        {/* FOOTER */}
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <View style={styles.footerButtons}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={savePet}
+              disabled={isPending}
+            >
+              <Text style={styles.buttonText}>
+                {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

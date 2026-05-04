@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
   inputField: {
     flex: 1,
     height: "100%",
+    color: "#000000",
   },
 
   iconButton: {

@@ -21,6 +21,7 @@ export default function AdminTabsLayout() {
       <Drawer.Screen name="DashboardScreen/Dashboard" />
       <Drawer.Screen name="BookingManagementScreen/BookingManagement" />
       <Drawer.Screen name="ServiceManagementScreen/ServiceManagement" />
+      <Drawer.Screen name="StaffManagementScreen/StaffManagement" />
       <Drawer.Screen name="UserManagementScreen/UserManagement" />
     </Drawer>
   );

@@ -10,6 +10,8 @@ export default StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
+    marginHorizontal: 12,
+    marginTop: 12,
     backgroundColor: "#5CB15A",
     flexDirection: "row",
     alignItems: "center",
@@ -101,7 +103,6 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   primaryBtnText: {
-    
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "700",
@@ -125,7 +126,7 @@ export default StyleSheet.create({
   sectionDivider: {
     height: 1,
     backgroundColor: "#E5E7EB",
-    marginVertical: 16,
+    marginBottom: 16,
   },
   serviceCard: {
     backgroundColor: "#FFFFFF",
@@ -142,20 +143,25 @@ export default StyleSheet.create({
   serviceName: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F2937",
-    marginBottom: 6,
+    color: "#000000",
+    marginBottom: 12,
   },
-  serviceDesc: {
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  infoLabel: {
+    width: "25%",
     fontSize: 14,
     fontWeight: "500",
-    color: "#4B5563",
-    marginBottom: 6,
+    color: "#6B7280",
   },
-  servicePrice: {
+  infoValue: {
+    width: "75%",
     fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 10,
+    fontWeight: "600",
+    color: "#111827",
   },
   actionRow: {
     flexDirection: "row",
@@ -195,5 +201,156 @@ export default StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     marginVertical: 8,
+  },
+  addBtn: {
+    backgroundColor: "#5CB15A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  addBtnText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 12,
+  },
+  modalContentWrapper: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: "85%", // Allow scrolling if content is long
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 20,
+    gap: 12,
+  },
+  cancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: "#F3F4F6",
+  },
+  cancelBtnText: {
+    color: "#4B5563",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  saveBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: "#5CB15A",
+  },
+  saveBtnText: {
+    color: "#FFF",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#000000",
+    marginBottom: 4,
+  },
+  flexContainer: {
+    flex: 1,
+  },
+  containerNoPadTop: {
+    padding: 12,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
+  modalScrollContent: {
+    paddingBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 12,
+  },
+  formGroupLarge: {
+    marginBottom: 16,
+  },
+  inputJustifyCenter: {
+    justifyContent: "center",
+  },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconMarginRight: {
+    marginRight: 8,
+  },
+  iconTextFilled: {
+    color: "#111827",
+  },
+  iconTextPlaceholder: {
+    color: "#9CA3AF",
+  },
+  quantifiableRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    backgroundColor: "#F9FAFB",
+    padding: 12,
+    borderRadius: 8,
+  },
+  quantifiableTextContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
+  quantifiableTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#000000",
+  },
+  quantifiableDesc: {
+    fontSize: 12,
+    color: "#000000",
+  },
+  imageWrapper: {
+    marginRight: 12,
+    position: "relative",
+  },
+  imagePreview: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: "#E5E7EB",
+  },
+  imageRemoveBtn: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+  },
+  imageAddBtn: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderStyle: "dashed",
   },
 });

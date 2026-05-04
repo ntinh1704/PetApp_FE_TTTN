@@ -5,6 +5,7 @@ export default function AdminLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="tabs" />
       <Stack.Screen name="Notifications/Notifications" />
+      <Stack.Screen name="BookingDetail/BookingDetail" />
     </Stack>
   );
 }

@@ -39,7 +39,7 @@ export default function AdminNotificationsScreen() {
       const rawText = notification.message || "Bạn có thông báo mới";
 
       // Regex to parse information for routing
-      const idMatch = rawText.match(/#BK(\d+)/i) || rawText.match(/mã (\d+)/i);
+      const idMatch = rawText.match(/#(\d+)/i) || rawText.match(/#BK(\d+)/i) || rawText.match(/mã\s*(?:#)?(\d+)/i);
       const extractedId = idMatch ? idMatch[1] : String(notification.booking_id || "");
       
       let title = notification.title || "Yêu cầu đặt lịch mới!";
@@ -81,7 +81,7 @@ export default function AdminNotificationsScreen() {
     
     if (item.bookingId) {
       router.push({
-        pathname: "/screens/admin/tabs/BookingManagementScreen/BookingDetail",
+        pathname: "/screens/admin/BookingDetail/BookingDetail",
         params: { bookingId: item.bookingId }
       });
     } else {
@@ -91,23 +91,23 @@ export default function AdminNotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={[styles.header, { marginHorizontal: 12, marginTop: 12 }]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color="#FFF" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Thông báo</Text>
 
-        <View style={{ width: 40 }} />
+        <View style={styles.headerSpacer} />
       </View>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: 0 }]}>
+      <ScrollView contentContainerStyle={styles.containerNoPadTop}>
 
         {isLoading && <Text style={styles.stateText}>Đang tải thông báo...</Text>}
 
         {!isLoading && sortedItems.length === 0 && <Text style={styles.stateText}>Chưa có thông báo nào.</Text>}
 
         {!isLoading && sortedItems.length > 0 && (
-          <View style={[styles.card, { marginTop: 12 }]}>
+          <View style={styles.cardMt12}>
             {sortedItems.map((item) => (
               <NotificationRow key={item.id} item={item} onPress={() => markAsRead(item)} />
             ))}
@@ -147,12 +147,12 @@ function NotificationRow({ item, onPress }: { item: NotificationItem; onPress: (
         style={[
           styles.row, 
           !item.isRead && item.type !== "cancel" && styles.rowUnread,
-          !item.isRead && item.type === "cancel" && { backgroundColor: "#FEF2F2" }
+          !item.isRead && item.type === "cancel" && styles.rowUnreadCancel
         ]} 
         activeOpacity={0.7} 
         onPress={onPress}
       >
-        <View style={[styles.thumbnailContainer, item.type === "cancel" && { backgroundColor: "#FEE2E2" }]}>
+        <View style={[styles.thumbnailContainer, item.type === "cancel" && styles.thumbnailCancel]}>
           <Ionicons 
             name={item.type === "cancel" ? "warning" : "calendar-outline"} 
             size={26} 
@@ -162,7 +162,7 @@ function NotificationRow({ item, onPress }: { item: NotificationItem; onPress: (
         </View>
 
         <View style={styles.textContainer}>
-          <Text style={[styles.titleText, item.type === "cancel" && !item.isRead && { color: "#B91C1C" }]}>{item.title}</Text>
+          <Text style={[styles.titleText, item.type === "cancel" && !item.isRead && styles.titleTextCancel]}>{item.title}</Text>
           <Text style={styles.bodyText}>{item.body}</Text>
           {item.timeString ? <Text style={styles.timeText}>{item.timeString}</Text> : null}
         </View>

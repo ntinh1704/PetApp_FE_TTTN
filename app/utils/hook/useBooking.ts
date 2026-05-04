@@ -4,6 +4,8 @@ import {
     useCreateBookingMutation,
     useDeleteBookingMutation,
     useUpdateBookingMutation,
+    useAddServiceToBookingMutation,
+    useStaffAvailabilityQuery,
 } from "./tanstack-query/bookingQueries";
 
 export const useBookings = () => {
@@ -24,4 +26,12 @@ export const useUpdateBooking = () => {
 
 export const useDeleteBooking = () => {
   return useDeleteBookingMutation();
+};
+
+export const useAddServiceToBooking = () => {
+  return useAddServiceToBookingMutation();
+};
+
+export const useStaffAvailability = (date: string, time: string, endTime: string) => {
+  return useStaffAvailabilityQuery(date, time, endTime);
 };

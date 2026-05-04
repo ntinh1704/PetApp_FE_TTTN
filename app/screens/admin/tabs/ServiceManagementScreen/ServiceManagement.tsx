@@ -13,13 +13,14 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
   Image,
+  Switch,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -41,6 +42,7 @@ export default function ServiceManagementScreen() {
   const { mutateAsync: deleteService, isPending: isDeleting } = useDeleteService();
 
   const [search, setSearch] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const scrollViewRef = React.useRef<ScrollView>(null);
   const [form, setForm] = useState({
@@ -49,6 +51,7 @@ export default function ServiceManagementScreen() {
     description: "",
     price: "",
     duration: "",
+    is_quantifiable: false,
     images: [] as string[],
   });
   const [iconModalVisible, setIconModalVisible] = useState(false);
@@ -99,9 +102,29 @@ export default function ServiceManagementScreen() {
     });
   }, [services, search]);
 
-  const resetForm = () => {
-    setForm({ name: "", icon: "", description: "", price: "", duration: "", images: [] });
+  const openForm = (item?: Service) => {
+    if (item) {
+      setEditingId(Number(item.id));
+      setForm({
+        name: item.name ?? "",
+        icon: item.icon ?? "",
+        description: item.description ?? "",
+        price: String(item.price ?? ""),
+        duration: String(item.duration ?? ""),
+        is_quantifiable: !!item.is_quantifiable,
+        images: item.images ?? [],
+      });
+    } else {
+      setEditingId(null);
+      setForm({ name: "", icon: "", description: "", price: "", duration: "", is_quantifiable: false, images: [] });
+    }
+    setModalVisible(true);
+  };
+
+  const closeForm = () => {
+    setModalVisible(false);
     setEditingId(null);
+    setForm({ name: "", icon: "", description: "", price: "", duration: "", is_quantifiable: false, images: [] });
   };
 
   const onSubmit = async () => {
@@ -129,6 +152,7 @@ export default function ServiceManagementScreen() {
       description: form.description.trim() || undefined,
       price: toPrice(form.price),
       duration: form.duration.trim() ? Number(form.duration) : undefined,
+      is_quantifiable: form.is_quantifiable,
       images: form.images.length > 0 ? form.images : undefined,
     };
 
@@ -140,24 +164,12 @@ export default function ServiceManagementScreen() {
         await createService(payload);
         Alert.alert("Thành công", "Đã thêm dịch vụ mới.");
       }
-      resetForm();
+      closeForm();
     } catch {
       Alert.alert("Lỗi", "Không thể lưu dịch vụ.");
     }
   };
 
-  const onEdit = (item: Service) => {
-    setEditingId(Number(item.id));
-    setForm({
-      name: item.name ?? "",
-      icon: item.icon ?? "",
-      description: item.description ?? "",
-      price: String(item.price ?? ""),
-      duration: String(item.duration ?? ""),
-      images: item.images ?? [],
-    });
-    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-  };
 
   const onDelete = (id: number) => {
     Alert.alert("Xóa dịch vụ", "Bạn có chắc chắn muốn xóa dịch vụ này?", [
@@ -180,24 +192,24 @@ export default function ServiceManagementScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={[styles.header, { marginHorizontal: 12, marginTop: 12 }]}>
+      <View style={styles.header}>
         <View style={styles.headerLeft}>  
-          <Pressable
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
             <Ionicons name="menu" size={20} color="#FFF" />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Quản lý dịch vụ</Text>
         </View>
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.flexContainer}
       >
         <ScrollView
           ref={scrollViewRef}
-          contentContainerStyle={[styles.container, { paddingTop: 0 }]}
+          contentContainerStyle={styles.containerNoPadTop}
           keyboardShouldPersistTaps="handled"
         >
 
@@ -209,101 +221,10 @@ export default function ServiceManagementScreen() {
           onChangeText={setSearch}
         />
 
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>{editingId ? "Sửa dịch vụ" : "Thêm dịch vụ"}</Text>
-
-          <TextInput
-            placeholder="Tên dịch vụ"
-            placeholderTextColor="#9CA3AF"
-            style={styles.input}
-            value={form.name}
-            onChangeText={(t) => setForm((prev) => ({ ...prev, name: t }))}
-          />
-
-          <TouchableOpacity
-            style={[styles.input, { justifyContent: "center" }]}
-            onPress={() => setIconModalVisible(true)}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {form.icon ? (
-                <Ionicons name={form.icon as any} size={20} color="#111827" style={{ marginRight: 8 }} />
-              ) : null}
-              <Text style={{ color: form.icon ? "#111827" : "#9CA3AF" }}>
-                {form.icon ? form.icon : "Chọn Icon (vd: medkit-outline)"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          <TextInput
-            placeholder="Mô tả"
-            placeholderTextColor="#9CA3AF"
-            style={[styles.input, styles.multilineInput]}
-            multiline
-            value={form.description}
-            onChangeText={(t) => setForm((prev) => ({ ...prev, description: t }))}
-          />
-
-            <TextInput
-            placeholder="Giá (VND)"
-            placeholderTextColor="#9CA3AF"
-            style={styles.input}
-            keyboardType="numeric"
-            value={form.price}
-            onChangeText={(t) => setForm((prev) => ({ ...prev, price: t }))}
-          />
-
-          <TextInput
-            placeholder="Thời lượng (phút)"
-            placeholderTextColor="#9CA3AF"
-            style={styles.input}
-            keyboardType="numeric"
-            value={form.duration}
-            onChangeText={(t) => setForm((prev) => ({ ...prev, duration: t }))}
-          />
-
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 8 }}>
-              Ảnh dịch vụ ({form.images.length}/5)
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {form.images.map((img, idx) => (
-                <View key={idx} style={{ marginRight: 12, position: "relative" }}>
-                  <Image source={{ uri: getImageUrl(img) }} style={{ width: 70, height: 70, borderRadius: 8, backgroundColor: "#E5E7EB" }} />
-                  <TouchableOpacity
-                    style={{ position: "absolute", top: -5, right: -5, backgroundColor: "#FFF", borderRadius: 10 }}
-                    onPress={() => removeImage(idx)}
-                  >
-                    <Ionicons name="close-circle" size={20} color="#DC2626" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              {form.images.length < 5 && (
-                <TouchableOpacity
-                  style={{ width: 70, height: 70, borderRadius: 8, backgroundColor: "#F3F4F6", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#D1D5DB", borderStyle: "dashed" }}
-                  onPress={pickImage}
-                >
-                  <Ionicons name="add" size={24} color="#6B7280" />
-                </TouchableOpacity>
-              )}
-            </ScrollView>
-          </View>
-
-          <View style={styles.formActions}>
-            {editingId && (
-              <TouchableOpacity style={styles.secondaryBtn} onPress={resetForm}>
-                <Text style={styles.secondaryBtnText}>Hủy</Text>
-              </TouchableOpacity>
-            )}
-            
-            <TouchableOpacity
-              style={[styles.primaryBtn, isMutating && styles.disabledBtn]}
-              onPress={onSubmit}
-              disabled={isMutating}
-            >
-              <Text style={styles.primaryBtnText}>{editingId ? "Cập nhật" : "Thêm dịch vụ"}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <TouchableOpacity style={styles.addBtn} onPress={() => openForm()}>
+          <Ionicons name="add-circle-outline" size={24} color="#FFF" />
+          <Text style={styles.addBtnText}>Thêm dịch vụ</Text>
+        </TouchableOpacity>
 
         <View style={styles.sectionDivider} />
 
@@ -317,15 +238,40 @@ export default function ServiceManagementScreen() {
           serviceList.map((item) => (
             <View key={String(item.id)} style={styles.serviceCard}>
               <Text style={styles.serviceName}>{item.name}</Text>
-              <Text style={styles.serviceDesc}>Icon: {item.icon || "Không có"}</Text>
-              <Text style={styles.serviceDesc}>{item.description || "Không có mô tả"}</Text>
+              
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Icon:</Text>
+                <Text style={styles.infoValue}>{item.icon || "Không có"}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Mô tả:</Text>
+                <Text style={styles.infoValue}>{item.description || "Không có mô tả"}</Text>
+              </View>
+
               {item.duration != null && item.duration > 0 && (
-                <Text style={styles.serviceDesc}>Thời lượng: {item.duration} phút</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Thời lượng:</Text>
+                  <Text style={styles.infoValue}>{item.duration} phút</Text>
+                </View>
               )}
-              <Text style={styles.servicePrice}>Giá: {(item.price ?? 0).toLocaleString("vi-VN")} đ</Text>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Số lượng:</Text>
+                <Text style={styles.infoValue}>
+                  {item.is_quantifiable ? "Cho phép đặt > 1" : "Cố định (tối đa 1)"}
+                </Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Giá:</Text>
+                <Text style={styles.infoValue}>
+                  {(item.price ?? 0).toLocaleString("vi-VN")} đ
+                </Text>
+              </View>
 
               <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.actionButton} onPress={() => onEdit(item)}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => openForm(item)}>
                   <Text style={styles.actionButtonText}>Sửa</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.deleteBtn} onPress={() => onDelete(Number(item.id))}>
@@ -337,6 +283,137 @@ export default function ServiceManagementScreen() {
           ))}
       </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal visible={modalVisible} transparent={true} animationType="fade">
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flexContainer}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContentWrapper}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScrollContent}>
+                <Text style={styles.modalTitle}>{editingId ? "Sửa dịch vụ" : "Thêm dịch vụ"}</Text>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Tên dịch vụ (*)</Text>
+                  <TextInput
+                    placeholder="Nhập tên dịch vụ"
+                    placeholderTextColor="#9CA3AF"
+                    style={styles.input}
+                    value={form.name}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, name: t }))}
+                  />
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Icon dịch vụ (*)</Text>
+                  <TouchableOpacity
+                    style={[styles.input, styles.inputJustifyCenter]}
+                    onPress={() => setIconModalVisible(true)}
+                  >
+                    <View style={styles.iconRow}>
+                      {form.icon ? (
+                        <Ionicons name={form.icon as any} size={20} color="#111827" style={styles.iconMarginRight} />
+                      ) : null}
+                      <Text style={form.icon ? styles.iconTextFilled : styles.iconTextPlaceholder}>
+                        {form.icon ? form.icon : "Chọn Icon (vd: medkit-outline)"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Mô tả (*)</Text>
+                  <TextInput
+                    placeholder="Nhập mô tả"
+                    placeholderTextColor="#9CA3AF"
+                    style={[styles.input, styles.multilineInput]}
+                    multiline
+                    value={form.description}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, description: t }))}
+                  />
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Giá (VND) (*)</Text>
+                  <TextInput
+                    placeholder="Ví dụ: 100000"
+                    placeholderTextColor="#9CA3AF"
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={form.price}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, price: t }))}
+                  />
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Thời lượng (phút) (*)</Text>
+                  <TextInput
+                    placeholder="Ví dụ: 30"
+                    placeholderTextColor="#9CA3AF"
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={form.duration}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, duration: t }))}
+                  />
+                </View>
+
+                <View style={styles.quantifiableRow}>
+                  <View style={styles.quantifiableTextContainer}>
+                    <Text style={styles.quantifiableTitle}>Tính theo số lượng</Text>
+                    <Text style={styles.quantifiableDesc}>Bật nếu dịch vụ có thể đặt &gt; 1 (ví dụ: Trông giữ theo giờ)</Text>
+                  </View>
+                  <Switch
+                    value={form.is_quantifiable}
+                    onValueChange={(v) => setForm(prev => ({ ...prev, is_quantifiable: v }))}
+                    trackColor={{ false: "#D1D5DB", true: "#5CB15A" }}
+                    thumbColor={Platform.OS === "ios" ? undefined : (form.is_quantifiable ? "#FFF" : "#F4F3F4")}
+                  />
+                </View>
+
+                <View style={styles.formGroupLarge}>
+                  <Text style={styles.label}>
+                    Ảnh dịch vụ ({form.images.length}/5)
+                  </Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {form.images.map((img, idx) => (
+                      <View key={idx} style={styles.imageWrapper}>
+                        <Image source={{ uri: getImageUrl(img) }} style={styles.imagePreview} />
+                        <TouchableOpacity
+                          style={styles.imageRemoveBtn}
+                          onPress={() => removeImage(idx)}
+                        >
+                          <Ionicons name="close-circle" size={20} color="#DC2626" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                    {form.images.length < 5 && (
+                      <TouchableOpacity
+                        style={styles.imageAddBtn}
+                        onPress={pickImage}
+                      >
+                        <Ionicons name="add" size={24} color="#6B7280" />
+                      </TouchableOpacity>
+                    )}
+                  </ScrollView>
+                </View>
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity style={styles.cancelBtn} onPress={closeForm} disabled={isMutating}>
+                    <Text style={styles.cancelBtnText}>Hủy</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.saveBtn, isMutating && styles.disabledBtn]}
+                    onPress={onSubmit}
+                    disabled={isMutating}
+                  >
+                    <Text style={styles.saveBtnText}>{editingId ? "Cập nhật" : "Lưu"}</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       <IconPickerModal
         visible={iconModalVisible}
         onClose={() => setIconModalVisible(false)}

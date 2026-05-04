@@ -184,7 +184,7 @@ export default function AddPetScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* DANH SÁCH THÚ CƯNG */}
-          <Text style={styles.section}>Thú cưng của tôi</Text>
+          <Text style={styles.section}>🐾 Thú cưng của tôi</Text>
 
           {(isLoading || isMutating) && (
             <View style={styles.stateWrapper}>

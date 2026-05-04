@@ -5,6 +5,8 @@ import {
   getBookingByIdApi,
   getBookingsApi,
   updateBookingApi,
+  addServiceToBookingApi,
+  getStaffAvailabilityApi,
 } from "../../../services/authBooking";
 import { BookingCreate, BookingUpdate } from "../../models/booking";
 
@@ -52,5 +54,25 @@ export const useUpdateBookingMutation = () => {
 export const useDeleteBookingMutation = () => {
   return useMutation({
     mutationFn: (id: number) => deleteBookingApi(id),
+  });
+};
+
+export const useAddServiceToBookingMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingId, serviceId, quantity }: { bookingId: number, serviceId: number, quantity: number }) => 
+      addServiceToBookingApi(bookingId, serviceId, quantity),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings", variables.bookingId] });
+    },
+  });
+};
+
+export const useStaffAvailabilityQuery = (date: string, time: string, endTime: string) => {
+  return useQuery({
+    queryKey: ["staff-availability", date, time, endTime],
+    queryFn: () => getStaffAvailabilityApi(date, time, endTime),
+    enabled: !!date && !!time,
   });
 };

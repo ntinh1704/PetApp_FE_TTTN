@@ -16,6 +16,7 @@ import { api } from "@/app/services/api";
 import { useChat } from "@/app/utils/contexts/ChatContext";
 import { useCart } from "@/app/utils/contexts/CartContext";
 import { styles } from "./styles";
+import { TypingIndicator } from "./TypingIndicator";
 
 type ServiceRecommendation = {
   id: number;
@@ -27,6 +28,12 @@ type ServiceRecommendation = {
   images?: string[];
 };
 
+const SUGGESTED_PROMPTS = [
+  "Tư vấn tiêm phòng cho chó",
+  "Bảng giá dịch vụ spa",
+  "Cách chăm sóc mèo con",
+];
+
 export default function ChatScreen() {
   const { chatHistory, addMessage, clearHistory } = useChat();
   const { addItem } = useCart();
@@ -36,11 +43,14 @@ export default function ChatScreen() {
 
   useEffect(() => {
     // Scroll to bottom on new message
-    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    setTimeout(
+      () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+      100,
+    );
   }, [chatHistory]);
 
-  const onSend = async () => {
-    const text = inputText.trim();
+  const onSend = async (customText?: string) => {
+    const text = customText || inputText.trim();
     if (!text || isLoading) return;
 
     setInputText("");
@@ -64,11 +74,14 @@ export default function ChatScreen() {
 
       addMessage({ role: "assistant", content });
     } catch (error: any) {
-      let errorContent = "Xin lỗi, đã có lỗi xảy ra. Không thể kết nối tới Chatbot lúc này.";
+      let errorContent =
+        "Xin lỗi, đã có lỗi xảy ra. Không thể kết nối tới Chatbot lúc này.";
       if (error?.response?.status === 429) {
-        errorContent = "Hệ thống AI đang bận. Vui lòng thử lại sau vài giây nhé! ⏳";
+        errorContent =
+          "Hệ thống AI đang bận. Vui lòng thử lại sau vài giây nhé! ⏳";
       } else if (error?.response?.status === 503) {
-        errorContent = "Hệ thống Chatbot đang bảo trì. Vui lòng quay lại sau. 🔧";
+        errorContent =
+          "Hệ thống Chatbot đang bảo trì. Vui lòng quay lại sau. 🔧";
       }
       addMessage({
         role: "assistant",
@@ -80,20 +93,30 @@ export default function ChatScreen() {
   };
 
   const handleClearHistory = () => {
-    Alert.alert("Xóa lịch sử", "Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?", [
-      { text: "Hủy", style: "cancel" },
-      { text: "Xóa", style: "destructive", onPress: clearHistory },
-    ]);
+    Alert.alert(
+      "Xóa lịch sử",
+      "Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?",
+      [
+        { text: "Hủy", style: "cancel" },
+        { text: "Xóa", style: "destructive", onPress: clearHistory },
+      ],
+    );
   };
 
   const renderMessageContent = (msg: any) => {
     if (msg.role === "user") {
-      return <Text style={[styles.messageText, styles.messageTextUser]}>{msg.content}</Text>;
+      return (
+        <Text style={[styles.messageText, styles.messageTextUser]}>
+          {msg.content}
+        </Text>
+      );
     }
 
     // AI message might contain serialized services
     const parts = msg.content.split("||__SERVICES__||");
-    const textPart = parts[0];
+    const textPart = parts[0]
+      .replace(/\*\*/g, "")
+      .replace(/!\[.*?\]\(.*?\)/g, "");
     let servicesPart: ServiceRecommendation[] = [];
     if (parts.length > 1) {
       try {
@@ -101,17 +124,39 @@ export default function ChatScreen() {
       } catch (e) {}
     }
 
+    const renderTextWithBold = (text: string) => {
+      const textSegments = text.split(/(\*\*.*?\*\*)/g);
+      return textSegments.map((segment, index) => {
+        if (segment.startsWith("**") && segment.endsWith("**")) {
+          return (
+            <Text key={index} style={{ fontWeight: "bold" }}>
+              {segment.slice(2, -2)}
+            </Text>
+          );
+        }
+        return <Text key={index}>{segment}</Text>;
+      });
+    };
+
     return (
       <View>
-        <Text style={[styles.messageText, styles.messageTextAI]}>{textPart}</Text>
-        
+        <Text style={[styles.messageText, styles.messageTextAI]}>
+          {renderTextWithBold(textPart)}
+        </Text>
+
         {servicesPart.length > 0 && (
           <View style={styles.recommendationContainer}>
-            <Text style={styles.recommendTitle}>🐾 Gợi ý dịch vụ dành cho bạn:</Text>
+            <Text style={styles.recommendTitle}>
+              🐾 Gợi ý dịch vụ dành cho bạn:
+            </Text>
             {servicesPart.map((s) => (
               <View key={s.id} style={styles.serviceCard}>
                 <View style={styles.serviceHeader}>
-                  <Ionicons name={(s.icon as any) || "medkit-outline"} size={20} color="#5CB15A" />
+                  <Ionicons
+                    name={(s.icon as any) || "medkit-outline"}
+                    size={20}
+                    color="#5CB15A"
+                  />
                   <Text style={styles.serviceName}>{s.name}</Text>
                 </View>
                 {s.description ? (
@@ -121,7 +166,9 @@ export default function ChatScreen() {
                 ) : null}
                 <View style={styles.serviceBottom}>
                   <Text style={styles.servicePrice}>
-                    {s.price ? `${s.price.toLocaleString("vi-VN")} đ` : "Liên hệ"}
+                    {s.price
+                      ? `${s.price.toLocaleString("vi-VN")} đ`
+                      : "Liên hệ"}
                   </Text>
                   <TouchableOpacity
                     style={styles.addBtn}
@@ -134,7 +181,10 @@ export default function ChatScreen() {
                         icon: s.icon,
                         description: s.description,
                       } as any);
-                      Alert.alert("Thành công", `Đã thêm ${s.name} vào giỏ lịch hẹn!`);
+                      Alert.alert(
+                        "Thành công",
+                        `Đã thêm ${s.name} vào giỏ lịch hẹn!`,
+                      );
                     }}
                   >
                     <Text style={styles.addBtnText}>Đặt ngay</Text>
@@ -161,8 +211,9 @@ export default function ChatScreen() {
       </View>
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1}}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -171,8 +222,19 @@ export default function ChatScreen() {
         >
           {chatHistory.length === 0 && (
             <View style={styles.emptyContainer}>
-              <Ionicons name="chatbubbles-outline" size={64} color="#D1D5DB" />
-              <Text style={styles.emptyText}>Xin chào! Tôi có thể giúp gì cho bạn?</Text>
+              <Ionicons
+                name="sparkles"
+                size={64}
+                color="#5CB15A"
+                style={{ marginBottom: 16 }}
+              />
+              {/* <Text style={[styles.emptyText, { color: '#1F2937', fontWeight: 'bold', fontSize: 18 }]}>
+                Trợ lý thú cưng AI
+              </Text> */}
+              <Text style={styles.emptyText}>
+                Hỏi tôi bất cứ điều gì về cách chăm sóc, đặt lịch dịch vụ, hay
+                bảng giá nhé!
+              </Text>
             </View>
           )}
 
@@ -181,7 +243,10 @@ export default function ChatScreen() {
             return (
               <View
                 key={index}
-                style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAI]}
+                style={[
+                  styles.messageRow,
+                  isUser ? styles.messageRowUser : styles.messageRowAI,
+                ]}
               >
                 {!isUser && (
                   <View style={styles.avatar}>
@@ -189,12 +254,24 @@ export default function ChatScreen() {
                   </View>
                 )}
                 <View
-                  style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAI]}
+                  style={[
+                    styles.bubble,
+                    isUser ? styles.bubbleUser : styles.bubbleAI,
+                  ]}
                 >
                   {renderMessageContent(msg)}
                 </View>
                 {isUser && (
-                  <View style={[styles.avatar, { marginLeft: 8, marginRight: 0, backgroundColor: "#D1D5DB" }]}>
+                  <View
+                    style={[
+                      styles.avatar,
+                      {
+                        marginLeft: 8,
+                        marginRight: 0,
+                        backgroundColor: "#D1D5DB",
+                      },
+                    ]}
+                  >
                     <Ionicons name="person" size={16} color="#4B5563" />
                   </View>
                 )}
@@ -207,29 +284,64 @@ export default function ChatScreen() {
               <View style={styles.avatar}>
                 <Ionicons name="pulse" size={16} color="#5CB15A" />
               </View>
-              <View style={[styles.bubble, styles.bubbleAI, { paddingHorizontal: 16 }]}>
-                <Text style={[styles.messageText, styles.messageTextAI]}>...</Text>
+              <View
+                style={[
+                  styles.bubble,
+                  styles.bubbleAI,
+                  { paddingHorizontal: 12, paddingVertical: 8 },
+                ]}
+              >
+                <TypingIndicator />
               </View>
             </View>
           )}
         </ScrollView>
 
+        {chatHistory.length === 0 && (
+          <View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.suggestionsContainer}
+            >
+              {SUGGESTED_PROMPTS.map((prompt, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.suggestionChip}
+                  onPress={() => onSend(prompt)}
+                >
+                  <Text style={styles.suggestionText}>{prompt}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.textInput}
             placeholder="Nhắn tin cho trợ lý..."
+            placeholderTextColor="#6B7280"
             value={inputText}
             onChangeText={setInputText}
             multiline
             maxLength={500}
-            onSubmitEditing={onSend}
+            onSubmitEditing={() => onSend()}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, (!inputText.trim() || isLoading) && styles.sendBtnDisabled]}
-            onPress={onSend}
+            style={[
+              styles.sendBtn,
+              (!inputText.trim() || isLoading) && styles.sendBtnDisabled,
+            ]}
+            onPress={() => onSend()}
             disabled={!inputText.trim() || isLoading}
           >
-            <Ionicons name="send" size={20} color="#FFF" style={{ marginLeft: 4 }} />
+            <Ionicons
+              name="send"
+              size={18}
+              color="#FFF"
+              style={{ marginLeft: 4 }}
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

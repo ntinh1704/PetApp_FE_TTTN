@@ -393,7 +393,7 @@ export default function ProfileScreen() {
           <Text style={styles.securityTitle}>Tiện ích</Text>
 
           {/* Chat với AI */}
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={styles.securityRow}
             activeOpacity={0.8}
             onPress={() => router.push("/screens/user/stack/ChatScreen/ChatScreen")}
@@ -403,7 +403,7 @@ export default function ProfileScreen() {
               <Text style={styles.securityLabel}>Chat với AI</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-          </TouchableOpacity> */}
+          </TouchableOpacity>
 
           {/* Đổi mật khẩu */}
           <TouchableOpacity

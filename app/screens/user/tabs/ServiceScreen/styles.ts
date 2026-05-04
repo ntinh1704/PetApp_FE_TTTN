@@ -6,6 +6,7 @@ export const styles = StyleSheet.create({
   /* ===== SAFE AREA ===== */
   safe: {
     flex: 1,
+    backgroundColor: GREEN,
   },
 
   /* ===== HEADER ===== */
@@ -43,6 +44,8 @@ export const styles = StyleSheet.create({
 
   /* ===== CONTENT ===== */
   content: {
+    backgroundColor: "#F3F4F6",
+    minHeight: "100%",
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,

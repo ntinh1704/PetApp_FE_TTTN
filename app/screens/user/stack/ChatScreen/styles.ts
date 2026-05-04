@@ -1,14 +1,15 @@
 import { StyleSheet, Platform, StatusBar } from "react-native";
 
+const GREEN = "#5CB15A";
+
 export const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
-    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    backgroundColor: GREEN,
   },
   header: {
     height: 60,
-    backgroundColor: "#5CB15A",
+    backgroundColor: GREEN,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -32,7 +33,9 @@ export const styles = StyleSheet.create({
     marginTop: 12,
   },
   chatList: {
+    flexGrow: 1,
     padding: 16,
+    backgroundColor: "#F3F4F6"
   },
   messageRow: {
     marginBottom: 16,
@@ -88,7 +91,7 @@ export const styles = StyleSheet.create({
   recommendTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#374151",
+    color: "#000000",
     marginBottom: 8,
   },
   serviceCard: {
@@ -154,6 +157,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 15,
     maxHeight: 100,
+    color: "#000000",
   },
   sendBtn: {
     width: 44,
@@ -166,5 +170,29 @@ export const styles = StyleSheet.create({
   },
   sendBtnDisabled: {
     backgroundColor: "#9CA3AF",
+  },
+  suggestionsContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#F3F4F6",
+  },
+  suggestionChip: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  suggestionText: {
+    color: "#4B5563",
+    fontSize: 13,
+    fontWeight: "500",
   },
 });

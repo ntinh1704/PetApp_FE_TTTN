@@ -29,9 +29,9 @@ type ServiceRecommendation = {
 };
 
 const SUGGESTED_PROMPTS = [
-  "Tư vấn tiêm phòng cho chó",
   "Bảng giá dịch vụ spa",
   "Cách chăm sóc mèo con",
+  "Tư vấn tiêm phòng cho chó",
 ];
 
 export default function ChatScreen() {
@@ -199,26 +199,29 @@ export default function ChatScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Trợ lý ảo thông minh</Text>
-        <TouchableOpacity onPress={handleClearHistory} style={{ padding: 4 }}>
-          <Ionicons name="trash-outline" size={24} color="#FFF" />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <SafeAreaView edges={["top"]} style={{ backgroundColor: "#5CB15A" }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+            <Ionicons name="chevron-back" size={24} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Trợ lý ảo thông minh</Text>
+          <TouchableOpacity onPress={handleClearHistory} style={{ padding: 4 }}>
+            <Ionicons name="trash-outline" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       <KeyboardAvoidingView
-        style={{ flex: 1}}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1, backgroundColor: "#F3F4F6" }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={styles.chatList}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {chatHistory.length === 0 && (
             <View style={styles.emptyContainer}>
@@ -298,22 +301,16 @@ export default function ChatScreen() {
         </ScrollView>
 
         {chatHistory.length === 0 && (
-          <View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.suggestionsContainer}
-            >
-              {SUGGESTED_PROMPTS.map((prompt, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  style={styles.suggestionChip}
-                  onPress={() => onSend(prompt)}
-                >
-                  <Text style={styles.suggestionText}>{prompt}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+          <View style={styles.suggestionsContainer}>
+            {SUGGESTED_PROMPTS.map((prompt, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.suggestionChip}
+                onPress={() => onSend(prompt)}
+              >
+                <Text style={styles.suggestionText}>{prompt}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 
@@ -345,6 +342,6 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

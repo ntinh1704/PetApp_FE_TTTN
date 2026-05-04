@@ -119,23 +119,26 @@ export default function AddPetDetail() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      {/* ===== HEADER ===== */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
-        </TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <SafeAreaView edges={["top"]} style={{ backgroundColor: "#5CB15A" }}>
+        {/* ===== HEADER ===== */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={22} color="#fff" />
+          </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Chỉnh sửa thú cưng</Text>
-        <View style={{ width: 22 }} />
-      </View>
+          <Text style={styles.headerTitle}>Chỉnh sửa thú cưng</Text>
+          <View style={{ width: 22 }} />
+        </View>
+      </SafeAreaView>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1}}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1, backgroundColor: "#F3F4F6" }}
       >
         <ScrollView contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* IMAGE */}
           <TouchableOpacity
@@ -245,6 +248,6 @@ export default function AddPetDetail() {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

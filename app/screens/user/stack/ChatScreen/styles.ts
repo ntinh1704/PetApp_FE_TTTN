@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
   chatList: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: "#F3F4F6"
+    backgroundColor: "#F3F4F6",
   },
   messageRow: {
     marginBottom: 16,
@@ -172,27 +172,23 @@ export const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
   },
   suggestionsContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: "#F3F4F6",
+    alignItems: "flex-end",
+    gap: 8,
   },
   suggestionChip: {
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-    elevation: 1,
+    borderColor: "#5CB15A",
   },
   suggestionText: {
-    color: "#4B5563",
-    fontSize: 13,
+    color: "#5CB15A",
+    fontSize: 14,
     fontWeight: "500",
   },
 });
